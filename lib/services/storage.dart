@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:localstorage/localstorage.dart';
-import 'package:mipal/models/userProfile.dart';
+import 'package:mipal/models/user_profile.dart';
 
 class StorageService {
   static final StorageService _sharedInstance = StorageService._internal();
@@ -13,7 +13,7 @@ class StorageService {
   }
 
   saveUser(UserProfile user) {
-    localStorage.setItem("user", jsonEncode(user.toJson()));
+    localStorage.setItem("user", jsonEncode(user.toMap()));
   }
 
   UserProfile? getUser() {

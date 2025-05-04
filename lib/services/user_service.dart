@@ -3,21 +3,41 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:mipal/helpers/env_vars.dart';
 import 'package:mipal/helpers/generate_unique_random_id.dart';
 import 'package:mipal/main.dart';
-import 'package:mipal/models/userProfile.dart';
+import 'package:mipal/models/user_profile.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class UserService {
 
-  Future<UserProfile?> getUserProfileById(String userId) async {
+  Future<UserProfile> getUserProfileById(String userId) async {
     try {
       final response = await supabase
           .from('profiles')
           .select()
           .eq('id', userId)
           .single();
+      if (response.isEmpty) {
+        throw Exception('Le profil utilisateur n\'existe pas.');
+      }
       return UserProfile.fromMap(response);
     } catch (e) {
-      return null;
+      throw Exception(e.toString());
+    }
+  }
+
+
+  Future<UserProfile> getUserProfileByAccountId(String accoundId) async {
+    try {
+      final response = await supabase
+          .from('profiles')
+          .select()
+          .eq('numero_de_compte', accoundId)
+          .single();
+      if (response.isEmpty) {
+        throw Exception('Le profil utilisateur n\'existe pas.');
+      }
+      return UserProfile.fromMap(response);
+    } catch (e) {
+      throw Exception(e.toString());
     }
   }
 
@@ -48,10 +68,19 @@ class UserService {
 
   Future<UserProfile?> createUserProfile(UserProfile userProfile) async {
     try {
-      await supabase.from('profiles').insert(userProfile.toJson());
+      await supabase.from('profiles').insert(userProfile.toMap());
       return await getUserProfileById(userProfile.id!);
     } catch (e) {
       throw Exception('Error creating user profile: $e');
+    }
+  }
+
+  Future<void> updateUserAmount(String userId, double amount) async {
+    try {
+      final profile = await getUserProfileById(userId);
+      await supabase.from('profiles').update({'solde': profile.solde! + amount}).eq('id', userId);
+    } catch (e) {
+      throw Exception('Erreur de modification du solde');
     }
   }
 

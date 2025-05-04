@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:mipal/helpers/colors.dart';
 import 'package:mipal/helpers/constants.dart';
 import 'package:mipal/main.dart';
-import 'package:mipal/models/userProfile.dart';
+import 'package:mipal/models/user_profile.dart';
 import 'package:mipal/pages/login.dart';
 import 'package:mipal/services/storage.dart';
 import 'package:mipal/services/user_service.dart';
@@ -22,9 +23,12 @@ class ProfilePage extends StatelessWidget {
         );
       }
     }).catchError((error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Erreur lors de la déconnexion.")),
-      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Erreur lors de la déconnexion.")),
+        );
+        
+      }
     });
   }
 
@@ -32,7 +36,9 @@ class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
+        backgroundColor: AppColors.background,
         title: AppConstants.appName,
       ),
       body: Column(

@@ -25,7 +25,7 @@ class UserProfile {
     this.numeroCompte,
   });
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toMap() {
     return {
       "id": id,
       "nom": nom,

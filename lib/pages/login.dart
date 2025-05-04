@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mipal/helpers/colors.dart';
 import 'package:mipal/main.dart';
 import 'package:mipal/pages/home.dart';
 import 'package:mipal/pages/signin.dart';
@@ -26,6 +27,7 @@ class _LoginScreenState extends State<LoginPage> {
       if (data.session != null) {
         final userId = data.session!.user.id;
         final userProfile = await UserService().getUserProfileById(userId);
+        
         if (userProfile != null) {
           await StorageService().saveUser(userProfile);
           if (mounted) {
@@ -47,6 +49,7 @@ class _LoginScreenState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

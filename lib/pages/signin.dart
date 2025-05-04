@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:mipal/models/userProfile.dart';
+import 'package:mipal/helpers/colors.dart';
+import 'package:mipal/models/user_profile.dart';
 import 'package:mipal/pages/home.dart';
 import 'package:mipal/services/storage.dart';
 import 'package:mipal/services/user_service.dart';
@@ -58,7 +59,6 @@ class _SigninPageState extends State<SigninPage> {
     await userService.createUserProfile(user);
     final userProfile = await userService.getUserProfileById(user.id!);
     if (userProfile != null) {
-      print("User profile created successfully: ${userProfile.toJson()}");
       await StorageService().saveUser(userProfile);
       if (mounted) {
         Navigator.of(context).pushReplacement(
@@ -66,10 +66,12 @@ class _SigninPageState extends State<SigninPage> {
         );
       }
     } else {
-      print("Failed to create user profile.");
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Erreur lors de la création du profil.")),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Erreur lors de la création du profil.")),
+        );
+        
+      }
     }
   }
 
@@ -79,7 +81,9 @@ class _SigninPageState extends State<SigninPage> {
     final double fieldWidth = MediaQuery.of(context).size.width * 0.8;
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
+        backgroundColor: AppColors.background,
         title: Text('Inscription'),
         automaticallyImplyLeading: false,
       ),
@@ -107,7 +111,7 @@ class _SigninPageState extends State<SigninPage> {
                 saveUser();
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
+                backgroundColor: AppColors.primary,
                 padding: EdgeInsets.symmetric(vertical: 16.0),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8.0),
