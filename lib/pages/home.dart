@@ -12,6 +12,8 @@ import 'package:mipal/services/transaction_service.dart';
 import 'package:mipal/services/user_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'add_transaction_page.dart';
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -186,8 +188,14 @@ class _HomePageState extends State<HomePage> {
                   _buildActionButton(
                     AppConstants.depot,
                     const Icon(Icons.arrow_downward_rounded, size: 30),
-                    () {
-                      Navigator.of(context).pushNamed('/addTransaction');
+                        () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => AddTransactionPage(
+                            initialBalance: userProfile!.solde,
+                          ),
+                        ),
+                      );
                     },
                   ),
                   const SizedBox(width: 10),
