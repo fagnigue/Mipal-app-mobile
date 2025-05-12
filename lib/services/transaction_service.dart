@@ -60,4 +60,23 @@ class TransactionService {
       throw Exception('Error listing transactions: $e');
     }
   }
+
+
+  Future<void> createDeposit(String userId, double amount) async {
+    try {
+      await supabase.from('transactions').insert({
+        'from': userId,
+        'to': userId,
+        'montant': amount,
+        'type': 'depot',
+        'created_at': DateTime.now().toIso8601String(),
+      });
+
+      await supabase.from('user_profiles').update({
+        'solde': supabase.from('user_profiles').select('solde').eq('id', userId).single().then((res) => res['solde'] + amount),
+      }).eq('id', userId);
+    } catch (e) {
+      throw Exception('Erreur lors du dépôt: $e');
+    }
+  }
 }
