@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:mipal/helpers/colors.dart';
+import 'package:mipal/helpers/format_exception.dart';
+import 'package:mipal/helpers/popup.dart';
 import 'package:mipal/helpers/widgets.dart';
+import 'package:mipal/pages/transactions/details_transaction.dart';
 import 'package:mipal/services/transaction_service.dart';
 
 class SendTransactionPage extends StatefulWidget {
@@ -8,8 +11,8 @@ class SendTransactionPage extends StatefulWidget {
   const SendTransactionPage({super.key, required this.initialAmount});
   
 
-  @override
-  _SendTransactionPageState createState() => _SendTransactionPageState();
+@override
+  State<SendTransactionPage> createState() => _SendTransactionPageState();
 }
 
 class _SendTransactionPageState extends State<SendTransactionPage> {
@@ -56,15 +59,15 @@ class _SendTransactionPageState extends State<SendTransactionPage> {
       
       final double amountValue = double.tryParse(amount) ?? 0.0;
       try {
-        await transactionService.createTransaction(recipient, amountValue);
-        Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Transaction envoyée avec succès", style: TextStyle(color: Colors.white),), backgroundColor: AppColors.success),
+        final String transactionId = await transactionService.createTransaction(recipient, amountValue);
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => DetailsTransaction(transactionId: transactionId),
+          ),
         );
+        Popup.showSuccess(context, "Transaction envoyée avec succès");
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Erreur: $e", style: TextStyle(color: Colors.white),), backgroundColor: AppColors.error),
-        );
+        Popup.showError(context, "Erreur: ${AppFormatException.message(e.toString())}");
         return;
       }
     }

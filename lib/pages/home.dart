@@ -4,8 +4,10 @@ import 'package:mipal/helpers/constants.dart';
 import 'package:mipal/main.dart';
 import 'package:mipal/models/transaction.dart';
 import 'package:mipal/models/user_profile.dart';
+import 'package:mipal/pages/cagnottes/cagnottes.dart';
 import 'package:mipal/pages/profile.dart';
-import 'package:mipal/pages/send_transaction.dart';
+import 'package:mipal/pages/transactions/details_transaction.dart';
+import 'package:mipal/pages/transactions/send_transaction.dart';
 import 'package:mipal/services/transaction_service.dart';
 import 'package:mipal/services/user_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -30,11 +32,8 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     currentUser = supabase.auth.currentUser;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      print("RECHARGEMENT DE LA PAGE");
       _loadUserProfile();
       _loadTransactions();
-    });
   }
 
   IconData predictTransactionIcon(Transaction transaction) {
@@ -56,7 +55,7 @@ class _HomePageState extends State<HomePage> {
     return Text(
       transaction.from == currentUser!.id
           ? "à ${transaction.toProfile?.prenom ?? ''} ${transaction.toProfile?.nom ?? ''}"
-          : "de ${transaction.fromProfile?.prenom ?? ''} ${transaction.toProfile?.nom ?? ''}",
+          : "de ${transaction.fromProfile?.prenom ?? ''} ${transaction.fromProfile?.nom ?? ''}",
     );
   }
 
@@ -74,7 +73,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Text formatTransactionType(Transaction transaction) {
+  String formatTransactionType(Transaction transaction) {
     String type = "";
     if (transaction.type == "transaction") {
       type = transaction.from == currentUser!.id ? "Envoyé" : "Reçu";
@@ -83,22 +82,30 @@ class _HomePageState extends State<HomePage> {
     } else {
       type = transaction.type;
     }
-    return Text(type);
+    return type;
+  }
+
+  String formatDate(DateTime date) {
+    String month = date.month.toString().padLeft(2, '0');
+    return "${date.day}/$month/${date.year}";
   }
 
   Future<void> _loadUserProfile() async {
     if (currentUser != null) {
-      userProfile = await userService.getUserProfileById(currentUser!.id);
+      final userProfileLoaded = await userService.getUserProfileById(currentUser!.id);
+      setState(() {
+        userProfile = userProfileLoaded;
+      });
     }
-    setState(() {});
   }
 
   Future<void> _loadTransactions() async {
     final currentUser = supabase.auth.currentUser;
     if (currentUser != null) {
-      transactions.addAll(
-        await transactionService.listTransactions(currentUser.id),
-      );
+      final transactionsLoaded = await transactionService.listTransactions(currentUser.id);
+      setState(() {
+        transactions = transactionsLoaded;
+      });
     }
     setState(() {});
   }
@@ -164,8 +171,8 @@ class _HomePageState extends State<HomePage> {
                   _buildActionButton(
                     AppConstants.envoyer,
                     const Icon(Icons.arrow_upward_rounded, size: 30),
-                    () {
-                      Navigator.of(context).push(
+                    () async {
+                     await Navigator.of(context).push(
                         MaterialPageRoute(
                           builder:
                               (context) => SendTransactionPage(
@@ -173,6 +180,8 @@ class _HomePageState extends State<HomePage> {
                               ),
                         ),
                       );
+                      await _loadUserProfile();
+                      await _loadTransactions();
                     },
                   ),
                   const SizedBox(width: 10),
@@ -194,7 +203,9 @@ class _HomePageState extends State<HomePage> {
                     AppConstants.cagnotte,
                     const Icon(Icons.account_balance_wallet_rounded, size: 30),
                     () {
-                      Navigator.of(context).pushNamed('/addTransaction');
+                      Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => const Cagnottes(),
+                      ));
                     },
                   ),
                   const SizedBox(width: 10),
@@ -225,8 +236,14 @@ class _HomePageState extends State<HomePage> {
                   return ListTile(
                     leading: Icon(predictTransactionIcon(transactions[index])),
                     title: formatTitle(transactions[index]),
-                    subtitle: formatTransactionType(transactions[index]),
+                    subtitle: Text("${formatTransactionType(transactions[index])} - ${formatDate(transactions[index].createdAt!)}"),
                     trailing: formatMontant(transactions[index]),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => DetailsTransaction(transactionId: transactions[index].id,)),
+                      );
+                    },
                   );
                 },
               ),

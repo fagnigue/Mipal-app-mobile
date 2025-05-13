@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:mipal/helpers/env_vars.dart';
 import 'package:mipal/pages/home.dart';
 import 'package:mipal/pages/login.dart';
@@ -17,6 +18,10 @@ void main() async {
   runApp(const MyApp());
 }
 
+final GoogleSignIn appGoogleSignIn = GoogleSignIn(
+      clientId: EnvVars.googleIosClientId,
+      serverClientId: EnvVars.googleWebClientId,
+    );
 final supabase = Supabase.instance.client;
 
 class MyApp extends StatelessWidget {
