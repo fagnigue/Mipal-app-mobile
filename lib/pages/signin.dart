@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mipal/helpers/colors.dart';
+import 'package:mipal/helpers/popup.dart';
+import 'package:mipal/helpers/widgets.dart';
 import 'package:mipal/models/user_profile.dart';
 import 'package:mipal/pages/home.dart';
 import 'package:mipal/services/storage.dart';
@@ -67,10 +69,7 @@ class _SigninPageState extends State<SigninPage> {
       }
     } else {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Erreur lors de la création du profil.")),
-        );
-        
+        Popup.showError(context, "Erreur lors de la création du profil.");
       }
     }
   }
@@ -96,13 +95,29 @@ class _SigninPageState extends State<SigninPage> {
               style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 20),
-            _buildTextField("Nom", fieldWidth, nomController),
+            AppWidgets.buildTextField(
+                labelText: 'Nom',
+                controller: nomController,
+                width: fieldWidth,
+              ),
             SizedBox(height: 20),
-            _buildTextField("Prénom", fieldWidth, prenomController),
+            AppWidgets.buildTextField(
+                labelText: 'Prénom',
+                controller: prenomController,
+                width: fieldWidth,
+              ),
             SizedBox(height: 20),
-            _buildTextField("Adresse", fieldWidth, adresseController),
+            AppWidgets.buildTextField(
+                labelText: 'Adresse',
+                controller: adresseController,
+                width: fieldWidth,
+              ),
             SizedBox(height: 20),
-            _buildTextField("Ville", fieldWidth, villeController),
+            AppWidgets.buildTextField(
+                labelText: 'Ville',
+                controller: villeController,
+                width: fieldWidth,
+              ),
             SizedBox(height: 20),
             _buildPhoneNumberField(telephoneController),
             SizedBox(height: 30),
@@ -128,24 +143,6 @@ class _SigninPageState extends State<SigninPage> {
     );
 }
 
-  Widget _buildTextField(String label, double width, TextEditingController? controller) {
-    return SizedBox(
-      width: width,
-      child: TextField(
-        controller: controller,
-        decoration: InputDecoration(
-          labelText: label,
-          filled: true,
-          fillColor: Color(0x68E0E0E0),
-          border: OutlineInputBorder(
-            borderSide: BorderSide.none,
-            borderRadius: BorderRadius.circular(8.0),
-          ),
-          contentPadding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-        ),
-      ),
-    );
-  }
 
   Widget _buildPhoneNumberField(TextEditingController controller) {
     return Row(
