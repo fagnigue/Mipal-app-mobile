@@ -110,19 +110,12 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                 style: TextStyle(fontSize: 12, color: Colors.grey),
               ),
               SizedBox(height: 30),
-              ElevatedButton(
+              AppWidgets.buildValidationButton(
+                text: 'Déposer',
                 onPressed: canDeposit ? _deposit : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  padding: EdgeInsets.symmetric(vertical: 16.0),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                ),
-                child: Text(
-                  'Déposer',
-                  style: TextStyle(fontSize: 18, color: Colors.white),
-                ),
+                color: AppColors.primary,
+                textColor: Colors.white,
+                width: MediaQuery.of(context).size.width * 0.8,
               ),
             ],
           ),
