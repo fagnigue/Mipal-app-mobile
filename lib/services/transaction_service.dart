@@ -84,8 +84,8 @@ class TransactionService {
         'created_at': DateTime.now().toIso8601String(),
       });
 
-      await supabase.from('user_profiles').update({
-        'solde': supabase.from('user_profiles').select('solde').eq('id', userId).single().then((res) => res['solde'] + amount),
+      await supabase.from('profiles').update({
+        'solde': supabase.from('profiles').select('solde').eq('id', userId).single().then((res) => res['solde'] + amount),
       }).eq('id', userId);
     } catch (e) {
       throw Exception('Erreur lors du dépôt: $e');

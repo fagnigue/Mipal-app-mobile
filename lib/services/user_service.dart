@@ -4,7 +4,12 @@ import 'package:mipal/helpers/generate_unique_random_id.dart';
 import 'package:mipal/helpers/popup.dart';
 import 'package:mipal/main.dart';
 import 'package:mipal/models/user_profile.dart';
+import 'package:mipal/services/storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../helpers/colors.dart';
+import '../pages/home.dart';
+import '../pages/signin.dart';
 
 class UserService {
   Future<UserProfile?> getUserProfileById(String userId) async {
@@ -107,5 +112,79 @@ class UserService {
       idToken: idToken!,
       accessToken: accessToken,
     );
+  }
+
+
+  Future<void> signInWithEmail(
+      BuildContext context, String email, String password) async {
+    try {
+      final response = await supabase.auth.signInWithPassword(
+        email: email,
+        password: password,
+      );
+      if (response.user != null) {
+        final userProfile = await getUserProfileById(response.user!.id);
+        if (userProfile != null) {
+          await StorageService().saveUser(userProfile);
+          if (context.mounted) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => const HomePage()),
+            );
+          }
+        } else {
+          if (context.mounted) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (context) => SigninPage(
+                  userId: response.user!.id,
+                  email: response.user!.email!,
+                ),
+              ),
+            );
+          }
+        }
+      }
+    } catch (error) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Erreur de connexion: $error"),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
+  }
+
+
+  Future<void> signUpWithEmail(
+      BuildContext context, String email, String password) async {
+    try {
+      final response = await supabase.auth.signUp(
+        email: email,
+        password: password,
+      );
+      if (response.user != null) {
+        if (context.mounted) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (context) => SigninPage(
+                userId: response.user!.id,
+                email: response.user!.email!,
+              ),
+            ),
+          );
+        }
+      }
+    } catch (error) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Erreur lors de l'inscription: $error"),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
   }
 }

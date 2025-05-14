@@ -12,7 +12,7 @@ import 'package:mipal/services/transaction_service.dart';
 import 'package:mipal/services/user_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import 'add_transaction_page.dart';
+import 'transactions/add_transaction_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

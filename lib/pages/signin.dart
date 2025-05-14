@@ -121,21 +121,14 @@ class _SigninPageState extends State<SigninPage> {
             SizedBox(height: 20),
             _buildPhoneNumberField(telephoneController),
             SizedBox(height: 30),
-            ElevatedButton(
+            AppWidgets.buildValidationButton(
+              text: "S'inscrire",
               onPressed: () {
                 saveUser();
               },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                padding: EdgeInsets.symmetric(vertical: 16.0),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-              ),
-              child: Text(
-                "S'inscrire",
-                style: TextStyle(fontSize: 18, color: Colors.white),
-              ),
+              color: AppColors.primary,
+              textColor: Colors.white,
+              width: MediaQuery.of(context).size.width * 0.8,
             ),
           ],
         ),
