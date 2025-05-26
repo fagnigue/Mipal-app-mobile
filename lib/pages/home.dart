@@ -11,7 +11,6 @@ import 'package:mipal/pages/transactions/send_transaction.dart';
 import 'package:mipal/services/transaction_service.dart';
 import 'package:mipal/services/user_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
 import 'transactions/add_transaction_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -52,6 +51,11 @@ class _HomePageState extends State<HomePage> {
   }
 
   Text formatTitle(Transaction transaction) {
+    if (transaction.type == "cagnotte") {
+      return Text(
+        transaction.cagnotte?.titre ?? '',
+      );
+    }
     return Text(
       transaction.from == currentUser!.id
           ? "à ${transaction.toProfile?.prenom ?? ''} ${transaction.toProfile?.nom ?? ''}"
@@ -93,9 +97,11 @@ class _HomePageState extends State<HomePage> {
   Future<void> _loadUserProfile() async {
     if (currentUser != null) {
       final userProfileLoaded = await userService.getUserProfileById(currentUser!.id);
-      setState(() {
-        userProfile = userProfileLoaded;
-      });
+      if (mounted) {
+        setState(() {
+          userProfile = userProfileLoaded;
+        });
+      }
     }
   }
 
@@ -103,9 +109,11 @@ class _HomePageState extends State<HomePage> {
     final currentUser = supabase.auth.currentUser;
     if (currentUser != null) {
       final transactionsLoaded = await transactionService.listTransactions(currentUser.id);
-      setState(() {
-        transactions = transactionsLoaded;
-      });
+      if (mounted) {
+        setState(() {
+          transactions = transactionsLoaded;
+        });
+      }
     }
     setState(() {});
   }
@@ -142,114 +150,126 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      body: ListView(
-        children: [
-          Container(
-            margin: const EdgeInsets.only(top: 30),
-            child: Center(
-              child: Column(
-                children: [
-                  AppConstants.solde,
-                  const SizedBox(height: 10),
-                  Text(
-                    userProfile != null ? "${userProfile!.solde} €" : "...",
-                    style: const TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold,
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await _loadUserProfile();
+          await _loadTransactions();
+        },
+        color: AppColors.background,
+        backgroundColor: AppColors.primary,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          children: [
+            Container(
+              margin: const EdgeInsets.only(top: 30),
+              child: Center(
+                child: Column(
+                  children: [
+                    AppConstants.solde,
+                    const SizedBox(height: 10),
+                    Text(
+                      userProfile != null ? "${userProfile!.solde} €" : "...",
+                      style: const TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-          Container(
-            margin: const EdgeInsets.only(top: 50),
-            child: Center(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _buildActionButton(
-                    AppConstants.envoyer,
-                    const Icon(Icons.arrow_upward_rounded, size: 30),
-                    () async {
-                     await Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder:
-                              (context) => SendTransactionPage(
-                                initialAmount: userProfile!.solde,
-                              ),
-                        ),
-                      );
-                      await _loadUserProfile();
-                      await _loadTransactions();
-                    },
-                  ),
-                  const SizedBox(width: 10),
-                  _buildActionButton(
-                    AppConstants.depot,
-                    const Icon(Icons.arrow_downward_rounded, size: 30),
-                        () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => AddTransactionPage(
-                            initialBalance: userProfile!.solde,
+            Container(
+              margin: const EdgeInsets.only(top: 50),
+              child: Center(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _buildActionButton(
+                      AppConstants.envoyer,
+                      const Icon(Icons.arrow_upward_rounded, size: 30),
+                      () async {
+                       await Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder:
+                                (context) => SendTransactionPage(
+                                  initialAmount: userProfile!.solde,
+                                ),
                           ),
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(width: 10),
-                  _buildActionButton(
-                    AppConstants.cagnotte,
-                    const Icon(Icons.account_balance_wallet_rounded, size: 30),
-                    () {
-                      Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => const Cagnottes(),
-                      ));
-                    },
-                  ),
-                  const SizedBox(width: 10),
-                  _buildActionButton(
-                    AppConstants.service,
-                    const Icon(Icons.add_business_rounded, size: 30),
-                    () {
-                      Navigator.of(context).pushNamed('/addTransaction');
-                    },
-                  ),
-                ],
+                        );
+                        await _loadUserProfile();
+                        await _loadTransactions();
+                      },
+                    ),
+                    const SizedBox(width: 10),
+                    _buildActionButton(
+                      AppConstants.depot,
+                      const Icon(Icons.arrow_downward_rounded, size: 30),
+                          () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => AddTransactionPage(
+                              initialBalance: userProfile!.solde,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(width: 10),
+                    _buildActionButton(
+                      AppConstants.cagnotte,
+                      const Icon(Icons.account_balance_wallet_rounded, size: 30),
+                      () async {
+                        await Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => Cagnottes(initialAmount: userProfile!.solde,),
+                        ));
+
+                        await _loadUserProfile();
+                        await _loadTransactions();
+                      },
+                    ),
+                    const SizedBox(width: 10),
+                    _buildActionButton(
+                      AppConstants.service,
+                      const Icon(Icons.add_business_rounded, size: 30),
+                      () {
+                        Navigator.of(context).pushNamed('/addTransaction');
+                      },
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-          Container(
-            margin: const EdgeInsets.only(top: 50),
-            padding: const EdgeInsets.only(left: 20),
-            child: AppConstants.transactions,
-          ),
-          Container(
-            margin: const EdgeInsets.only(top: 20),
-            child: SizedBox(
-              height: 300,
-              child: ListView.builder(
-                itemCount: transactions.length,
-                shrinkWrap: true,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    leading: Icon(predictTransactionIcon(transactions[index])),
-                    title: formatTitle(transactions[index]),
-                    subtitle: Text("${formatTransactionType(transactions[index])} - ${formatDate(transactions[index].createdAt!)}"),
-                    trailing: formatMontant(transactions[index]),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => DetailsTransaction(transactionId: transactions[index].id,)),
-                      );
-                    },
-                  );
-                },
+            Container(
+              margin: const EdgeInsets.only(top: 50),
+              padding: const EdgeInsets.only(left: 20),
+              child: AppConstants.transactions,
+            ),
+            Container(
+              margin: const EdgeInsets.only(top: 20),
+              child: SizedBox(
+                height: 300,
+                child: ListView.builder(
+                  itemCount: transactions.length,
+                  shrinkWrap: true,
+                  itemBuilder: (context, index) {
+                    return ListTile(
+                      leading: Icon(predictTransactionIcon(transactions[index])),
+                      title: formatTitle(transactions[index]),
+                      subtitle: Text("${formatTransactionType(transactions[index])} - ${formatDate(transactions[index].createdAt)}"),
+                      trailing: formatMontant(transactions[index]),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => DetailsTransaction(transactionId: transactions[index].id,)),
+                        );
+                      },
+                    );
+                  },
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

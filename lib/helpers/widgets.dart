@@ -61,4 +61,40 @@ class AppWidgets {
   static Widget errorText(String message) {
     return Text(message, style: TextStyle(color: Colors.red, fontSize: 14.0));
   }
+
+  static Widget buildUnwrittableInput({
+    required IconData icon,
+    required String text,
+    required double width,
+    Color backgroundColor = AppColors.inputBackground,
+    Color iconColor = Colors.black87,
+    Color textColor = Colors.black87,
+    VoidCallback? onTap,
+  }) {
+    return SizedBox(
+      width: width,
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
+          decoration: BoxDecoration(
+            color: backgroundColor,
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+          child: Row(
+            children: [
+              Icon(icon, color: iconColor),
+              SizedBox(width: 12.0),
+              Expanded(
+                child: Text(
+                  text,
+                  style: TextStyle(color: textColor, fontSize: 16.0),
+                ),
+              ),
+            ],
+          ),
+      )
+      )
+    );
+  }
 }

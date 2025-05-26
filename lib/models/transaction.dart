@@ -1,3 +1,4 @@
+import 'package:mipal/models/cagnotte.dart';
 import 'package:mipal/models/user_profile.dart';
 import 'package:uuid/uuid.dart';
 
@@ -8,9 +9,11 @@ class Transaction {
   final String? to;
   final double montant;
   final String type;
+  final String? cagnotteId;
 
   UserProfile? fromProfile;
   UserProfile? toProfile;
+  Cagnotte? cagnotte;
 
   Transaction({
     required this.id,
@@ -21,14 +24,17 @@ class Transaction {
     required this.type,
     this.fromProfile,
     this.toProfile,
+    this.cagnotteId,
+    this.cagnotte,
   });
 
   
   factory Transaction.create({
-    required String from,
-    required String to,
+    String? from,
+    String? to,
     required double montant,
     required String type,
+    String? cagnotteId,
   }) {
     return Transaction(
       id: Uuid().v4(),
@@ -37,6 +43,7 @@ class Transaction {
       to: to,
       montant: montant,
       type: type,
+      cagnotteId: cagnotteId,
     );
   }
 
@@ -48,6 +55,7 @@ class Transaction {
       'to': to,
       'montant': montant,
       'type': type,
+      'cagnotte_id': cagnotteId,
     };
   }
 
@@ -57,5 +65,6 @@ class Transaction {
         from = map['from'],
         to = map['to'],
         montant = (map['montant'] as num).toDouble(),
-        type = map['type'];
+        type = map['type'],
+        cagnotteId = map['cagnotte_id'];
 }

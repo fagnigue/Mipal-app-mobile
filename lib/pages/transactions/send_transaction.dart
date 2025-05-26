@@ -3,15 +3,15 @@ import 'package:mipal/helpers/colors.dart';
 import 'package:mipal/helpers/format_exception.dart';
 import 'package:mipal/helpers/popup.dart';
 import 'package:mipal/helpers/widgets.dart';
+import 'package:mipal/pages/beneficiaires.dart';
 import 'package:mipal/pages/transactions/details_transaction.dart';
 import 'package:mipal/services/transaction_service.dart';
 
 class SendTransactionPage extends StatefulWidget {
   final double? initialAmount;
   const SendTransactionPage({super.key, required this.initialAmount});
-  
 
-@override
+  @override
   State<SendTransactionPage> createState() => _SendTransactionPageState();
 }
 
@@ -39,7 +39,9 @@ class _SendTransactionPageState extends State<SendTransactionPage> {
     });
     _recipientController.addListener(() {
       setState(() {
-        recipientValid = _recipientController.text.isNotEmpty && _recipientController.text.length == 6;
+        recipientValid =
+            _recipientController.text.isNotEmpty &&
+            _recipientController.text.length == 6;
         canSend = recipientValid && amountValid;
       });
     });
@@ -56,21 +58,37 @@ class _SendTransactionPageState extends State<SendTransactionPage> {
     if (_formKey.currentState!.validate()) {
       final amount = _amountController.text;
       final recipient = _recipientController.text;
-      
+
       final double amountValue = double.tryParse(amount) ?? 0.0;
       try {
-        final String transactionId = await transactionService.createTransaction(recipient, amountValue);
+        final String transactionId = await transactionService.createTransaction(
+          recipient,
+          amountValue,
+        );
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
-            builder: (context) => DetailsTransaction(transactionId: transactionId),
+            builder:
+                (context) => DetailsTransaction(transactionId: transactionId),
           ),
         );
         Popup.showSuccess(context, "Transaction envoyée avec succès");
       } catch (e) {
-        Popup.showError(context, "Erreur: ${AppFormatException.message(e.toString())}");
+        Popup.showError(
+          context,
+          "Erreur: ${AppFormatException.message(e.toString())}",
+        );
         return;
       }
     }
+  }
+
+  void goToBenefiaires() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>  BeneficiairesPage(),
+      ),
+    );
   }
 
   @override
@@ -88,19 +106,25 @@ class _SendTransactionPageState extends State<SendTransactionPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              AppWidgets.buildTextField(
-                labelText: 'Bénéficiaire',
-                hintText: 'Entrez le numéro de compte',
-                controller: _recipientController,
+              // AppWidgets.buildTextField(
+              //   labelText: 'Bénéficiaire',
+              //   hintText: 'Entrez le numéro de compte',
+              //   controller: _recipientController,
+              //   width: MediaQuery.of(context).size.width * 0.8,
+              //   validator: (value) {
+              //     if (value == null || value.isEmpty) {
+              //       return 'Veuillez entrer un numéro de compte';
+              //     }
+              //     return null;
+              //   },
+              //   keyboardType: TextInputType.number,
+              //   prefixIcon: Icons.person,
+              // ),
+              AppWidgets.buildUnwrittableInput(
+                icon: Icons.person,
+                text: "Beneficaire",
                 width: MediaQuery.of(context).size.width * 0.8,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Veuillez entrer un numéro de compte';
-                  }
-                  return null;
-                },
-                keyboardType: TextInputType.number,
-                prefixIcon: Icons.person,
+                onTap: goToBenefiaires
               ),
               SizedBox(height: 16),
               AppWidgets.buildTextField(
@@ -108,12 +132,6 @@ class _SendTransactionPageState extends State<SendTransactionPage> {
                 hintText: 'Entrez le montant à envoyer',
                 controller: _amountController,
                 width: MediaQuery.of(context).size.width * 0.8,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Veuillez entrer un montant';
-                  }
-                  return null;
-                },
                 keyboardType: TextInputType.number,
                 prefixIcon: Icons.euro_symbol_rounded,
               ),
@@ -124,7 +142,10 @@ class _SendTransactionPageState extends State<SendTransactionPage> {
                     'Montant initial: ${widget.initialAmount} €',
                     style: TextStyle(fontSize: 12, color: Colors.grey),
                   ),
-                  Text("restant: $restant €", style: TextStyle(fontSize: 12, color: Colors.grey)),
+                  Text(
+                    "restant: $restant €",
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
                 ],
               ),
               SizedBox(height: 30),
