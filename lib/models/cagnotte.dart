@@ -10,8 +10,9 @@ class Cagnotte {
   final double solde;
   final String statut;
   final String code;
-  final UserProfile? createur;
-  final String? createurId;
+  final String? profileId;
+
+  UserProfile? profile;
 
   Cagnotte({
     required this.id,
@@ -21,14 +22,14 @@ class Cagnotte {
     required this.solde,
     required this.statut,
     required this.code,
-    this.createur,
-    this.createurId,
+    this.profile,
+    this.profileId,
   });
 
   factory Cagnotte.create({
     required String titre,
     String? description,
-    required String createurId,
+    required String profileId,
     required double solde,
     required String code,
   }) {
@@ -40,7 +41,7 @@ class Cagnotte {
       solde: solde,
       statut: CagnotteStatut.enCours.value,
       code: code,
-      createurId: createurId,
+      profileId: profileId,
     );
   }
   factory Cagnotte.fromJson(Map<String, dynamic> json) {
@@ -52,6 +53,7 @@ class Cagnotte {
       solde: json['solde'].toDouble(),
       statut: json['statut'],
       code: json['code'],
+      profileId: json['profile_id'],
     );
   }
 
@@ -64,7 +66,7 @@ class Cagnotte {
       'solde': solde,
       'statut': statut,
       'code': code,
-      'createur': createurId,
+      'profile_id': profileId,
     };
   }
 }

@@ -18,7 +18,9 @@ class ProfilePage extends StatelessWidget {
     await StorageService().clearUser();
 
     await supabase.auth.signOut().then((value) async {
-      await appGoogleSignIn.disconnect();
+      if (appGoogleSignIn.currentUser != null) {
+        await appGoogleSignIn.disconnect();
+      }
       if (context.mounted) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => const LoginPage()),
