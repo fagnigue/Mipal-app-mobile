@@ -39,7 +39,6 @@ class _DetailsTransactionState extends State<DetailsTransaction> {
         return;
       }
       setState(() {
-        transactionDetails = transactionDetails;
         isLoading = false;
       });
     } catch (e) {
@@ -51,27 +50,39 @@ class _DetailsTransactionState extends State<DetailsTransaction> {
   }
 
   String formatTransactionType(Transaction transaction) {
-    String type = "";
-    if (transaction.type == "transaction") {
-      type = transaction.from == currentUser!.id ? "Envoi" : "Reception";
-    } else if (transaction.type == "depot") {
-      type = "Dépôt";
-    } else {
-      type = transaction.type;
+    switch (transaction.type) {
+      case "transaction":
+        return transaction.from == currentUser!.id ? "Envoi" : "Réception";
+      case "depot":
+        return "Dépôt";
+      case "cagnotte":
+        return "Cagnotte";
+      default:
+        return transaction.type;
     }
-    return type;
   }
 
-  Text formatRecipientOrSender(Transaction transaction) {
+  Widget formatRecipientOrSender(Transaction transaction) {
+    if (transaction.type == 'depot') {
+      return Text(
+        "Effectué par ${transaction.fromProfile?.prenom ?? ''} ${transaction.fromProfile?.nom ?? ''}",
+        style: const TextStyle(fontSize: 18, color: Colors.grey),
+      );
+    }
     return Text(
       transaction.from == currentUser!.id
           ? "Destinataire: ${transaction.toProfile?.prenom ?? ''} ${transaction.toProfile?.nom ?? ''}"
           : "Expéditeur: ${transaction.fromProfile?.prenom ?? ''} ${transaction.fromProfile?.nom ?? ''}",
+      style: const TextStyle(fontSize: 18, color: Colors.grey),
     );
   }
 
   String formatDate(DateTime date) {
-    return "${date.day}/${date.month}/${date.year} à ${date.hour}:${date.minute}";
+    String month = date.month.toString().padLeft(2, '0');
+    String day = date.day.toString().padLeft(2, '0');
+    String hour = date.hour.toString().padLeft(2, '0');
+    String minute = date.minute.toString().padLeft(2, '0');
+    return "$day/$month/${date.year} à $hour:$minute";
   }
 
   @override
@@ -85,27 +96,52 @@ class _DetailsTransactionState extends State<DetailsTransaction> {
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : transactionDetails != null
-              ? Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Type: ${formatTransactionType(transactionDetails!)}',
-                          style: const TextStyle(fontSize: 20)),
-                        const SizedBox(height: 15),
-                      Text('${formatRecipientOrSender(transactionDetails!).data}',
-                          style: const TextStyle(fontSize: 20)),
-                      const SizedBox(height: 15),
-                      Text('Montant: ${transactionDetails!.montant} €',
-                          style: const TextStyle(fontSize: 20)),
-                      const SizedBox(height: 15),
-                      Text('Date: ${formatDate(transactionDetails!.createdAt)}',
-                          style: const TextStyle(fontSize: 20)),
-                      const SizedBox(height: 15),
-                    ],
+          ? Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Type: ${formatTransactionType(transactionDetails!)}',
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 15),
+            if (transactionDetails!.type == 'depot')
+              Row(
+                children: [
+                  const Icon(Icons.description, color: AppColors.primary),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Description: ${transactionDetails!.description ?? 'Aucune description'}',
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                    ),
                   ),
-                )
-              : const Center(child: Text('Aucune donnée disponible')),
+                ],
+              ),
+            if (transactionDetails!.type != 'depot' &&
+                transactionDetails!.description != null &&
+                transactionDetails!.description!.isNotEmpty)
+              Text(
+                'Description: ${transactionDetails!.description}',
+                style: const TextStyle(fontSize: 18, color: Colors.grey),
+              ),
+            const SizedBox(height: 15),
+            formatRecipientOrSender(transactionDetails!),
+            const SizedBox(height: 15),
+            Text(
+              'Montant: ${transactionDetails!.montant} €',
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 15),
+            Text(
+              'Date: ${formatDate(transactionDetails!.createdAt)}',
+              style: const TextStyle(fontSize: 18, color: Colors.grey),
+            ),
+          ],
+        ),
+      )
+          : const Center(child: Text('Aucune donnée disponible')),
     );
   }
 }

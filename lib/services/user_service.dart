@@ -12,16 +12,33 @@ import '../pages/home.dart';
 import '../pages/signin.dart';
 
 class UserService {
-  Future<UserProfile?> getUserProfileById(String userId) async {
+  Future<UserProfile?> getUserProfileById(String id) async {
     try {
-      final response =
-          await supabase.from('profiles').select().eq('id', userId).maybeSingle();
+      final response = await supabase
+          .from('profiles')
+          .select()
+          .eq('id', id)
+          .maybeSingle();
+
       if (response == null) {
+        final user = supabase.auth.currentUser;
+        if (user != null) {
+          final newProfile = {
+            'id': id,
+            'solde': 0.0,
+            'prenom': user.userMetadata?['given_name'] ?? 'Utilisateur',
+            'nom': user.userMetadata?['family_name'] ?? '',
+            'account_id': user.email ?? id,
+            'created_at': DateTime.now().toIso8601String(),
+          };
+          await supabase.from('profiles').insert(newProfile);
+          return UserProfile.fromMap(newProfile);
+        }
         return null;
       }
       return UserProfile.fromMap(response);
     } catch (e) {
-      throw Exception(e.toString());
+      throw Exception('Erreur lors de la récupération du profil: $e');
     }
   }
 
