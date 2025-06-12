@@ -31,12 +31,12 @@ class ProfilePage extends StatelessWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Erreur lors de la déconnexion.")),
         );
-        
+
       }
     });
   }
 
- 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
