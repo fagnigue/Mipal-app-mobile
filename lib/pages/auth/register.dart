@@ -4,19 +4,19 @@ import 'package:mipal/helpers/popup.dart';
 import 'package:mipal/helpers/widgets.dart';
 import 'package:mipal/models/user_profile.dart';
 import 'package:mipal/pages/home.dart';
-import 'package:mipal/services/storage.dart';
+import 'package:mipal/services/storage_service.dart';
 import 'package:mipal/services/user_service.dart';
 
-class SigninPage extends StatefulWidget {
+class RegisterPage extends StatefulWidget {
   final String userId;
   final String email;
-  const SigninPage({super.key, required this.userId, required this.email});
+  const RegisterPage({super.key, required this.userId, required this.email});
 
   @override
-  State<SigninPage> createState() => _SigninPageState();
+  State<RegisterPage> createState() => _RegisterPageState();
 }
 
-class _SigninPageState extends State<SigninPage> {
+class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController nomController = TextEditingController();
   final TextEditingController prenomController = TextEditingController();
   final TextEditingController adresseController = TextEditingController();
@@ -45,7 +45,6 @@ class _SigninPageState extends State<SigninPage> {
       return;
     }
     
-    UserService userService = UserService();
     final user = UserProfile(
       id: widget.userId,
       email: widget.email,
@@ -55,11 +54,11 @@ class _SigninPageState extends State<SigninPage> {
       ville: villeController.text,
       telephone: "+33${telephoneController.text}",
       solde: 0.0,
-      numeroCompte: await userService.generateUniqueId(),
+      numeroCompte: await UserService().generateUniqueId(),
     );
     
-    await userService.createUserProfile(user);
-    final userProfile = await userService.getUserProfileById(user.id!);
+    await UserService().createUserProfile(user);
+    final userProfile = await UserService().getUserProfileById(user.id!);
     if (userProfile != null) {
       await StorageService().saveUser(userProfile);
       if (mounted) {

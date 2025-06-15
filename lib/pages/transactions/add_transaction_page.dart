@@ -10,7 +10,7 @@ class AddTransactionPage extends StatefulWidget {
   const AddTransactionPage({super.key, required this.initialBalance});
 
   @override
-  _AddTransactionPageState createState() => _AddTransactionPageState();
+  State<AddTransactionPage> createState() => _AddTransactionPageState();
 }
 
 class _AddTransactionPageState extends State<AddTransactionPage> {
@@ -49,7 +49,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
           await TransactionService().createDeposit(
             currentUser.id,
             amount,
-            description: description.isNotEmpty ? description : null,
+            description.isNotEmpty ? description : null,
           );
           if (mounted) {
             Navigator.of(context).pop();
@@ -63,10 +63,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
         }
       } catch (e) {
         if (mounted) {
-          Popup.showError(
-            context,
-            "Erreur lors du dépôt: $e",
-          );
+          Popup.showError(context, "Erreur lors du dépôt: $e");
         }
       } finally {
         if (mounted) setState(() => _isLoading = false);
@@ -85,56 +82,60 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: _isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                AppWidgets.buildTextField(
-                  labelText: 'Montant du dépôt',
-                  hintText: 'Entrez le montant à déposer',
-                  controller: _amountController,
-                  width: MediaQuery.of(context).size.width * 0.8,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Veuillez entrer un montant';
-                    }
-                    final amount = double.tryParse(value);
-                    if (amount == null || amount <= 0) {
-                      return 'Veuillez entrer un montant valide supérieur à 0';
-                    }
-                    return null;
-                  },
-                  keyboardType: TextInputType.number,
-                  prefixIcon: Icons.euro_symbol_rounded,
-                ),
-                const SizedBox(height: 16),
-                AppWidgets.buildTextField(
-                  labelText: 'Description (facultatif)',
-                  hintText: 'Entrez une description pour ce dépôt',
-                  controller: _descriptionController,
-                  width: MediaQuery.of(context).size.width * 0.8,
-                  keyboardType: TextInputType.text,
-                  prefixIcon: Icons.description,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Solde actuel: ${widget.initialBalance ?? 0.0} €',
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
-                ),
-                const SizedBox(height: 30),
-                AppWidgets.buildValidationButton(
-                  text: 'Déposer',
-                  onPressed: canDeposit ? _deposit : null,
-                  color: AppColors.primary,
-                  textColor: Colors.white,
-                  width: MediaQuery.of(context).size.width * 0.8,
-                ),
-              ],
-            ),
-          ),
+          child:
+              _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        AppWidgets.buildTextField(
+                          labelText: 'Montant du dépôt',
+                          hintText: 'Entrez le montant à déposer',
+                          controller: _amountController,
+                          width: MediaQuery.of(context).size.width * 0.8,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Veuillez entrer un montant';
+                            }
+                            final amount = double.tryParse(value);
+                            if (amount == null || amount <= 0) {
+                              return 'Veuillez entrer un montant valide supérieur à 0';
+                            }
+                            return null;
+                          },
+                          keyboardType: TextInputType.number,
+                          prefixIcon: Icons.euro_symbol_rounded,
+                        ),
+                        const SizedBox(height: 16),
+                        AppWidgets.buildTextField(
+                          labelText: 'Description (facultatif)',
+                          hintText: 'Entrez une description pour ce dépôt',
+                          controller: _descriptionController,
+                          width: MediaQuery.of(context).size.width * 0.8,
+                          keyboardType: TextInputType.text,
+                          prefixIcon: Icons.description,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Solde actuel: ${widget.initialBalance ?? 0.0} €',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
+                          ),
+                        ),
+                        const SizedBox(height: 30),
+                        AppWidgets.buildValidationButton(
+                          text: 'Déposer',
+                          onPressed: canDeposit ? _deposit : null,
+                          color: AppColors.primary,
+                          textColor: Colors.white,
+                          width: MediaQuery.of(context).size.width * 0.8,
+                        ),
+                      ],
+                    ),
+                  ),
         ),
       ),
     );

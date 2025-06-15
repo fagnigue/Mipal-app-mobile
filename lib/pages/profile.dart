@@ -3,8 +3,8 @@ import 'package:mipal/helpers/colors.dart';
 import 'package:mipal/helpers/constants.dart';
 import 'package:mipal/main.dart';
 import 'package:mipal/models/user_profile.dart';
-import 'package:mipal/pages/login.dart';
-import 'package:mipal/services/storage.dart';
+import 'package:mipal/pages/auth/login.dart';
+import 'package:mipal/services/storage_service.dart';
 import 'package:mipal/services/user_service.dart';
 
 class ProfilePage extends StatelessWidget {

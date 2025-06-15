@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mipal/helpers/colors.dart';
 import 'package:mipal/helpers/constants.dart';
+import 'package:mipal/helpers/popup.dart';
 import 'package:mipal/main.dart';
 import 'package:mipal/models/transaction.dart';
 import 'package:mipal/models/user_profile.dart';
@@ -31,8 +32,8 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     currentUser = supabase.auth.currentUser;
-      _loadUserProfile();
-      _loadTransactions();
+    _loadUserProfile();
+    _loadTransactions();
   }
 
   IconData predictTransactionIcon(Transaction transaction) {
@@ -52,9 +53,10 @@ class _HomePageState extends State<HomePage> {
 
   Text formatTitle(Transaction transaction) {
     if (transaction.type == "cagnotte") {
-      return Text(
-        transaction.cagnotte?.titre ?? '',
-      );
+      return Text(transaction.cagnotte?.titre ?? '');
+    }
+    if (transaction.type == "depot") {
+      return const Text("Dépôt");
     }
     return Text(
       transaction.from == currentUser!.id
@@ -96,7 +98,9 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _loadUserProfile() async {
     if (currentUser != null) {
-      final userProfileLoaded = await userService.getUserProfileById(currentUser!.id);
+      final userProfileLoaded = await userService.getUserProfileById(
+        currentUser!.id,
+      );
       if (mounted) {
         setState(() {
           userProfile = userProfileLoaded;
@@ -106,16 +110,24 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _loadTransactions() async {
-    final currentUser = supabase.auth.currentUser;
-    if (currentUser != null) {
-      final transactionsLoaded = await transactionService.listTransactions(currentUser.id);
-      if (mounted) {
-        setState(() {
-          transactions = transactionsLoaded;
-        });
+    try {
+      final currentUser = supabase.auth.currentUser;
+      if (currentUser != null) {
+        final transactionsLoaded = await transactionService.listTransactions(
+          currentUser.id,
+        );
+        if (mounted) {
+          setState(() {
+            transactions = transactionsLoaded;
+          });
+        }
       }
+    } catch (e) {
+      if (mounted) {
+        Popup.showError(context, "Erreur lors du chargement des transactions");
+      }
+      return;
     }
-    setState(() {});
   }
 
   @override
@@ -188,7 +200,7 @@ class _HomePageState extends State<HomePage> {
                       AppConstants.envoyer,
                       const Icon(Icons.arrow_upward_rounded, size: 30),
                       () async {
-                       await Navigator.of(context).push(
+                        await Navigator.of(context).push(
                           MaterialPageRoute(
                             builder:
                                 (context) => SendTransactionPage(
@@ -204,24 +216,35 @@ class _HomePageState extends State<HomePage> {
                     _buildActionButton(
                       AppConstants.depot,
                       const Icon(Icons.arrow_downward_rounded, size: 30),
-                          () {
-                        Navigator.of(context).push(
+                      () async {
+                        await Navigator.of(context).push(
                           MaterialPageRoute(
-                            builder: (context) => AddTransactionPage(
-                              initialBalance: userProfile!.solde,
-                            ),
+                            builder:
+                                (context) => AddTransactionPage(
+                                  initialBalance: userProfile!.solde,
+                                ),
                           ),
                         );
+                        await _loadUserProfile();
+                        await _loadTransactions();
                       },
                     ),
                     const SizedBox(width: 10),
                     _buildActionButton(
                       AppConstants.cagnotte,
-                      const Icon(Icons.account_balance_wallet_rounded, size: 30),
+                      const Icon(
+                        Icons.account_balance_wallet_rounded,
+                        size: 30,
+                      ),
                       () async {
-                        await Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) => Cagnottes(initialAmount: userProfile!.solde,),
-                        ));
+                        await Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder:
+                                (context) => Cagnottes(
+                                  initialAmount: userProfile!.solde,
+                                ),
+                          ),
+                        );
 
                         await _loadUserProfile();
                         await _loadTransactions();
@@ -232,7 +255,7 @@ class _HomePageState extends State<HomePage> {
                       AppConstants.service,
                       const Icon(Icons.add_business_rounded, size: 30),
                       () {
-                        Navigator.of(context).pushNamed('/addTransaction');
+                        Popup.showInfo(context, "Action pas encore implémentée");
                       },
                     ),
                   ],
@@ -253,14 +276,23 @@ class _HomePageState extends State<HomePage> {
                   shrinkWrap: true,
                   itemBuilder: (context, index) {
                     return ListTile(
-                      leading: Icon(predictTransactionIcon(transactions[index])),
+                      leading: Icon(
+                        predictTransactionIcon(transactions[index]),
+                      ),
                       title: formatTitle(transactions[index]),
-                      subtitle: Text("${formatTransactionType(transactions[index])} - ${formatDate(transactions[index].createdAt)}"),
+                      subtitle: Text(
+                        "${formatTransactionType(transactions[index])} - ${formatDate(transactions[index].createdAt)}",
+                      ),
                       trailing: formatMontant(transactions[index]),
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => DetailsTransaction(transactionId: transactions[index].id,)),
+                          MaterialPageRoute(
+                            builder:
+                                (context) => DetailsTransaction(
+                                  transactionId: transactions[index].id,
+                                ),
+                          ),
                         );
                       },
                     );

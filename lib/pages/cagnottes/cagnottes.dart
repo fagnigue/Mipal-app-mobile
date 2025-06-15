@@ -79,7 +79,7 @@ class _CagnottesState extends State<Cagnottes> {
                     leading: const Icon(Icons.account_balance_wallet_rounded, size: 40,),
                     title: Text(cagnotte.titre),
                     subtitle: Text(
-                      "Créée le ${_formatDate(cagnotte.createdAt!)}\n"
+                      "Créée le ${_formatDate(cagnotte.createdAt)}\n"
                       "Solde: ${cagnotte.solde} €\n"
                     ),
                     onTap: () {

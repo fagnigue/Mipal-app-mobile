@@ -3,6 +3,7 @@ import 'package:mipal/helpers/generate_unique_random_id.dart';
 import 'package:mipal/main.dart';
 import 'package:mipal/models/cagnotte.dart';
 import 'package:mipal/models/user_profile.dart';
+import 'package:mipal/services/storage_service.dart';
 import 'package:mipal/services/transaction_service.dart';
 import 'package:mipal/services/user_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -16,25 +17,34 @@ class CagnotteService {
   final User? currentUser = supabase.auth.currentUser;
 
 
-  Future<String> createCagnotte(String titre, double solde, String? description) async {
+  Future<String> createCagnotte(String titre, double montantDeBase, String? description) async {
     try {
       final cagnotte = Cagnotte.create(
         titre: titre,
-        solde: solde,
+        solde: 0.0,
         profileId: currentUser!.id,
         description: description,
         code: await generateUniqueCode(),
       );
 
       await supabase.from('cagnottes').insert(cagnotte.toJson());
-      if (solde > 0) {
+      if (montantDeBase > 0) {
         await TransactionService().createTransactionForCagnotte(
           currentUser!.id,
-          solde,
+          montantDeBase,
           cagnotte.id,
         );
       }
       return cagnotte.id;
+    } catch (e) {
+      throw Exception(AppFormatException.message("Erreur: $e"));
+    }
+  }
+
+  Future<void> updateSoldeCagnotte(String cagnotteId, double solde) async {
+    try {
+      final cagnotte = await getCagnotteById(cagnotteId);
+      await supabase.from('cagnottes').update({'solde': cagnotte!.solde + solde}).eq('id', cagnotteId);
     } catch (e) {
       throw Exception(AppFormatException.message("Erreur: $e"));
     }
@@ -77,6 +87,22 @@ class CagnotteService {
     }
   }
 
+  Future<Cagnotte> getCagnotteByCode(String code) async {
+    try {
+      final response = await supabase
+          .from('cagnottes')
+          .select()
+          .eq('code', code)
+          .maybeSingle();
+      if (response == null) {
+        throw Exception('Aucune cagnotte trouvée avec ce code.');
+      }
+      return Cagnotte.fromJson(response);
+    } catch (e) {
+      throw Exception(AppFormatException.message("$e"));
+    }
+  }
+
   Future<List<Cagnotte>> getCagnottes() async {
     try {
       final response = await supabase
@@ -93,6 +119,21 @@ class CagnotteService {
       })); 
     } catch (e) {
       throw Exception('Erreur lors de la récupération des cagnottes');
+    }
+  }
+
+  ajouterCagnotte(String codeCagnotte) async {
+    try {
+      final Cagnotte cagnotte = await getCagnotteByCode(codeCagnotte);
+      final List<Cagnotte > cagnottes = StorageService().getCagnottes();
+
+      if (cagnottes.any((c) => c.code == cagnotte.code)) {
+        throw Exception('Cette cagnotte est déjà ajoutée.');
+      }
+      
+      StorageService().ajouterCagnotte(cagnotte);
+    } catch (e) {
+      throw Exception(AppFormatException.message(e.toString()));
     }
   }
 
