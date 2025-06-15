@@ -10,7 +10,7 @@ class Transaction {
   final double montant;
   final String type;
   final String? cagnotteId;
-
+  final String? description;
   UserProfile? fromProfile;
   UserProfile? toProfile;
   Cagnotte? cagnotte;
@@ -22,6 +22,7 @@ class Transaction {
     required this.to,
     required this.montant,
     required this.type,
+    required this.description,
     this.fromProfile,
     this.toProfile,
     this.cagnotteId,
@@ -35,6 +36,7 @@ class Transaction {
     required double montant,
     required String type,
     String? cagnotteId,
+    String? description,
   }) {
     return Transaction(
       id: Uuid().v4(),
@@ -44,6 +46,7 @@ class Transaction {
       montant: montant,
       type: type,
       cagnotteId: cagnotteId,
+      description: description,
     );
   }
 
@@ -56,6 +59,7 @@ class Transaction {
       'montant': montant,
       'type': type,
       'cagnotte_id': cagnotteId,
+      'description': description,
     };
   }
 
@@ -66,5 +70,6 @@ class Transaction {
         to = map['to'],
         montant = (map['montant'] as num).toDouble(),
         type = map['type'],
+        description = map['description'],
         cagnotteId = map['cagnotte_id'];
 }

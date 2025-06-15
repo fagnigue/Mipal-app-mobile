@@ -15,12 +15,12 @@ class CreateCagnotte extends StatefulWidget {
 class _CreateCagnotteState extends State<CreateCagnotte> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _soldeController = TextEditingController();
+  final TextEditingController _montantController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   double restant = 0.0;
   bool canSend = false;
   bool titleValid = false;
-  bool soldeValid = true;
+  bool montantValid = true;
   bool isLoading = false;
 
   @override
@@ -31,17 +31,17 @@ class _CreateCagnotteState extends State<CreateCagnotte> {
         titleValid =
             _titleController.text.isNotEmpty &&
             _titleController.text.length > 3;
-        canSend = titleValid && soldeValid;
+        canSend = titleValid && montantValid;
       });
     });
 
-    _soldeController.addListener(() {
+    _montantController.addListener(() {
       setState(() {
-        if (_soldeController.text.isNotEmpty) {
-          double soldeValue = double.tryParse(_soldeController.text) ?? 0.0;
-          restant = widget.initialAmount! - soldeValue;
-          soldeValid = soldeValue > 0 && restant >= 0;
-          canSend = titleValid && soldeValid;
+        if (_montantController.text.isNotEmpty) {
+          double montantValue = double.tryParse(_montantController.text) ?? 0.0;
+          restant = widget.initialAmount! - montantValue;
+          montantValid = montantValue > 0 && restant >= 0;
+          canSend = titleValid && montantValid;
         }
       });
     });
@@ -50,7 +50,7 @@ class _CreateCagnotteState extends State<CreateCagnotte> {
   @override
   void dispose() {
     _titleController.dispose();
-    _soldeController.dispose();
+    _montantController.dispose();
     _descriptionController.dispose();
     super.dispose();
   }
@@ -58,7 +58,7 @@ class _CreateCagnotteState extends State<CreateCagnotte> {
   void _submitForm() async {
     if (_formKey.currentState!.validate()) {
       final title = _titleController.text;
-      final balance = double.tryParse(_soldeController.text) ?? 0.0;
+      final montantDeBase = double.tryParse(_montantController.text) ?? 0.0;
       final description = _descriptionController.text;
 
       try {
@@ -66,7 +66,7 @@ class _CreateCagnotteState extends State<CreateCagnotte> {
           isLoading = true;
         });
         final CagnotteService cagnotteService = CagnotteService();
-        await cagnotteService.createCagnotte(title, balance, description);
+        await cagnotteService.createCagnotte(title, montantDeBase, description);
         if (mounted) {
           Popup.showSuccess(context, 'Cagnotte créée avec succès');
           Navigator.pop(context);
@@ -105,8 +105,8 @@ class _CreateCagnotteState extends State<CreateCagnotte> {
               SizedBox(height: 16),
               AppWidgets.buildTextField(
                 labelText: 'Solde (Facultatif)',
-                hintText: 'Entrez le solde de départ',
-                controller: _soldeController,
+                hintText: 'Entrez le montant de départ',
+                controller: _montantController,
                 width: MediaQuery.of(context).size.width * 0.8,
                 keyboardType: TextInputType.number,
               ),

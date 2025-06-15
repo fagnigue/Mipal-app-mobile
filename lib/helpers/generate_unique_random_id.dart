@@ -10,7 +10,7 @@ class GenerateUniqueRandomId {
 
   String generateWithPrefix(String prefix) {
     final Random random = Random();
-    int randomValue = (100000 + random.nextInt(900000));
+    int randomValue = (1000000 + random.nextInt(9000000));
     return '$prefix$randomValue';
   }
 }

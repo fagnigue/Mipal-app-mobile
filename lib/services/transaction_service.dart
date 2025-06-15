@@ -45,6 +45,7 @@ class TransactionService {
       );
       await supabase.from('transactions').insert(transaction.toMap());
       await UserService().updateUserAmount(from, -montant);
+      await CagnotteService().updateSoldeCagnotte(cagnotteId, montant);
       return transaction.id;
     } catch (e) {
       throw Exception(AppFormatException.message(e.toString()));
@@ -63,7 +64,7 @@ class TransactionService {
         return null;
       }
 
-      final UserProfile? fromProfile = await UserService().getUserProfileById(response['from']);
+      final UserProfile? fromProfile = response['from'] != null ? await UserService().getUserProfileById(response['from']) :  null;
       final UserProfile? toProfile = await UserService().getUserProfileById(response['to']);
       final transaction = Transaction.fromMap(response);
       transaction.fromProfile = fromProfile;
@@ -85,14 +86,13 @@ class TransactionService {
           .order('created_at', ascending: false);
       
       return Future.wait((response as List).map((e) async {
-        final UserProfile? fromProfile = await UserService().getUserProfileById(e['from']);
-        final UserProfile? toProfile = await UserService().getUserProfileById(e['to']);
+        final UserProfile? fromProfile = e['from'] != null ? await UserService().getUserProfileById(e['from']) : null;
+        final UserProfile? toProfile = e['from'] != null ? await UserService().getUserProfileById(e['to']) : null;
         final transaction = Transaction.fromMap(e);
         transaction.fromProfile = fromProfile;
         transaction.toProfile = toProfile;
         if (e['cagnotte_id'] != null) {
           final Cagnotte? cagnotte = await CagnotteService().getCagnotteById(e['cagnotte_id']);
-          print("Cagnotte: ${cagnotte?.titre}");
           transaction.cagnotte = cagnotte;
         }
         return transaction;
@@ -103,19 +103,16 @@ class TransactionService {
   }
 
 
-  Future<void> createDeposit(String userId, double montant) async {
+  Future<void> createDeposit(String userId, double montant, String? description) async {
     try {
-      await supabase.from('transactions').insert({
-        'from': userId,
-        'to': userId,
-        'montant': montant,
-        'type': 'depot',
-        'created_at': DateTime.now().toIso8601String(),
-      });
+      final Transaction transaction = Transaction.create(
+        from: userId,
+        montant: montant,
+        type: 'depot',
+      );
 
-      await supabase.from('profiles').update({
-        'solde': supabase.from('profiles').select('solde').eq('id', userId).single().then((res) => res['solde'] + montant),
-      }).eq('id', userId);
+      await supabase.from('transactions').insert(transaction.toMap());
+      await UserService().updateUserAmount(transaction.to!, montant);
     } catch (e) {
       throw Exception('Erreur lors du dépôt: $e');
     }

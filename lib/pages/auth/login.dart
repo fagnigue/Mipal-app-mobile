@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:mipal/helpers/colors.dart';
+import 'package:mipal/helpers/popup.dart';
 import 'package:mipal/helpers/widgets.dart';
 import 'package:mipal/main.dart';
-import 'package:mipal/pages/home.dart';
-import 'package:mipal/pages/signin.dart';
-import 'package:mipal/services/storage.dart';
-import 'package:mipal/services/user_service.dart';
+import 'package:mipal/pages/auth/signup.dart';
+import 'package:mipal/services/auth_service.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -27,29 +26,35 @@ class _LoginScreenState extends State<LoginPage> {
 
   void _setupAuthListener() {
     supabase.auth.onAuthStateChange.listen((data) async {
-      if (data.session != null) {
-        final userId = data.session!.user.id;
-        final userProfile = await UserService().getUserProfileById(userId);
-
-        if (userProfile != null) {
-          await StorageService().saveUser(userProfile);
-          if (mounted) {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (context) => const HomePage()),
-            );
-          }
-        } else {
-          if (mounted) {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (context) =>
-                    SigninPage(userId: userId, email: data.session!.user.email!),
-              ),
-            );
-          }
-        }
+      if (mounted) {
+        AuthService().handleAuthstateChange(data, context);
       }
     });
+  }
+
+  void _handleSignInWithEmail() async {
+    if (_formKey.currentState!.validate()) {
+      try {
+        await AuthService().signInWithEmail(
+          _emailController.text,
+          _passwordController.text,
+        );
+      } catch (e) {
+        if (mounted) {
+          Popup.showError(context, "$e");
+        }
+      }
+    }
+  }
+
+  void _handleSignInWithGoogle() async {
+    try {
+      await AuthService().googleSignIn();
+    } catch (e) {
+      if (mounted) {
+        Popup.showError(context, "$e");
+      }
+    }
   }
 
   @override
@@ -90,8 +95,9 @@ class _LoginScreenState extends State<LoginPage> {
                         if (value == null || value.isEmpty) {
                           return 'Veuillez entrer un e-mail';
                         }
-                        if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                            .hasMatch(value)) {
+                        if (!RegExp(
+                          r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                        ).hasMatch(value)) {
                           return 'Veuillez entrer un e-mail valide';
                         }
                         return null;
@@ -103,7 +109,7 @@ class _LoginScreenState extends State<LoginPage> {
                       hintText: 'Entrez votre mot de passe',
                       controller: _passwordController,
                       width: MediaQuery.of(context).size.width * 0.8,
-                      keyboardType: TextInputType.text,
+                      keyboardType: TextInputType.visiblePassword,
                       prefixIcon: Icons.lock,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
@@ -117,29 +123,20 @@ class _LoginScreenState extends State<LoginPage> {
                     ),
                     const SizedBox(height: 20),
                     AppWidgets.buildValidationButton(
-                      text: 'Se connecter',
-                      onPressed: () async {
-                        if (_formKey.currentState!.validate()) {
-                          await UserService().signInWithEmail(
-                            context,
-                            _emailController.text,
-                            _passwordController.text,
-                          );
-                        }
-                      },
+                      text: "S'identifier",
+                      onPressed: _handleSignInWithEmail,
                       color: AppColors.primary,
-                      textColor: Colors.white, width: MediaQuery.of(context).size.width * 0.8,
+                      textColor: Colors.white,
+                      width: MediaQuery.of(context).size.width * 0.8,
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 5),
                     TextButton(
-                      onPressed: () async {
-                        if (_formKey.currentState!.validate()) {
-                          await UserService().signUpWithEmail(
-                            context,
-                            _emailController.text,
-                            _passwordController.text,
-                          );
-                        }
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => SignupPage(),
+                          ),
+                        );
                       },
                       child: const Text(
                         "S'inscrire",
@@ -156,18 +153,7 @@ class _LoginScreenState extends State<LoginPage> {
               ),
               const SizedBox(height: 20),
               ElevatedButton(
-                onPressed: () async {
-                  try {
-                    await UserService().googleSignIn(context);
-                  } catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text("Erreur lors de la connexion Google: $e"),
-                        backgroundColor: AppColors.error,
-                      ),
-                    );
-                  }
-                },
+                onPressed:  _handleSignInWithGoogle,
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [

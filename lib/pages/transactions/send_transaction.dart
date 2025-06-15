@@ -3,6 +3,8 @@ import 'package:mipal/helpers/colors.dart';
 import 'package:mipal/helpers/format_exception.dart';
 import 'package:mipal/helpers/popup.dart';
 import 'package:mipal/helpers/widgets.dart';
+import 'package:mipal/models/cagnotte.dart';
+import 'package:mipal/models/user_profile.dart';
 import 'package:mipal/pages/beneficiaires.dart';
 import 'package:mipal/pages/transactions/details_transaction.dart';
 import 'package:mipal/services/transaction_service.dart';
@@ -24,6 +26,8 @@ class _SendTransactionPageState extends State<SendTransactionPage> {
   bool canSend = false;
   bool recipientValid = false;
   bool amountValid = false;
+  UserProfile? beneficiaire;
+  Cagnotte? cagnotte;
 
   @override
   void initState() {
@@ -39,9 +43,7 @@ class _SendTransactionPageState extends State<SendTransactionPage> {
     });
     _recipientController.addListener(() {
       setState(() {
-        recipientValid =
-            _recipientController.text.isNotEmpty &&
-            _recipientController.text.length == 6;
+        recipientValid = _recipientController.text.isNotEmpty;
         canSend = recipientValid && amountValid;
       });
     });
@@ -56,22 +58,35 @@ class _SendTransactionPageState extends State<SendTransactionPage> {
 
   void _sendTransaction() async {
     if (_formKey.currentState!.validate()) {
-      final amount = _amountController.text;
-      final recipient = _recipientController.text;
+      final amount = _amountController.text.trim();
+      final recipient = _recipientController.text.trim();
 
       final double amountValue = double.tryParse(amount) ?? 0.0;
       try {
-        final String transactionId = await transactionService.createTransaction(
-          recipient,
-          amountValue,
-        );
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder:
-                (context) => DetailsTransaction(transactionId: transactionId),
-          ),
-        );
-        Popup.showSuccess(context, "Transaction envoyée avec succès");
+        String? transactionId;
+        if (beneficiaire != null) {
+          transactionId = await transactionService.createTransaction(
+            recipient,
+            amountValue,
+          );
+        }
+        if (cagnotte != null) {
+          transactionId = await transactionService.createTransactionForCagnotte(
+            recipient,
+            amountValue,
+            cagnotte!.id,
+          );
+        }
+        if (transactionId != null) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder:
+                  (context) =>
+                      DetailsTransaction(transactionId: transactionId!),
+            ),
+          );
+          Popup.showSuccess(context, "Transaction envoyée avec succès");
+        }
       } catch (e) {
         Popup.showError(
           context,
@@ -83,12 +98,42 @@ class _SendTransactionPageState extends State<SendTransactionPage> {
   }
 
   void goToBenefiaires() async {
-    await Navigator.push(
+    final result = await Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) =>  BeneficiairesPage(),
-      ),
+      MaterialPageRoute(builder: (context) => BeneficiairesPage()),
     );
+
+    if (result != null && result is UserProfile) {
+      setState(() {
+        beneficiaire = result;
+        cagnotte = null;
+        _recipientController.text = beneficiaire?.numeroCompte ?? '';
+      });
+    } else if (result != null && result is Cagnotte) {
+      setState(() {
+        cagnotte = result;
+        beneficiaire = null;
+        _recipientController.text = cagnotte?.profileId ?? '';
+      });
+    }
+  }
+
+  String formatText() {
+    if (beneficiaire != null) {
+      return "${beneficiaire!.nom} ${beneficiaire!.prenom}";
+    } else if (cagnotte != null) {
+      return cagnotte!.titre;
+    }
+    return "Beneficaire";
+  }
+
+  IconData formatIcon() {
+    if (beneficiaire != null) {
+      return Icons.person;
+    } else if (cagnotte != null) {
+      return Icons.account_balance_wallet_rounded;
+    }
+    return Icons.person_outline;
   }
 
   @override
@@ -106,25 +151,11 @@ class _SendTransactionPageState extends State<SendTransactionPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // AppWidgets.buildTextField(
-              //   labelText: 'Bénéficiaire',
-              //   hintText: 'Entrez le numéro de compte',
-              //   controller: _recipientController,
-              //   width: MediaQuery.of(context).size.width * 0.8,
-              //   validator: (value) {
-              //     if (value == null || value.isEmpty) {
-              //       return 'Veuillez entrer un numéro de compte';
-              //     }
-              //     return null;
-              //   },
-              //   keyboardType: TextInputType.number,
-              //   prefixIcon: Icons.person,
-              // ),
               AppWidgets.buildUnwrittableInput(
-                icon: Icons.person,
-                text: "Beneficaire",
+                icon: formatIcon(),
+                text: formatText(),
                 width: MediaQuery.of(context).size.width * 0.8,
-                onTap: goToBenefiaires
+                onTap: goToBenefiaires,
               ),
               SizedBox(height: 16),
               AppWidgets.buildTextField(
