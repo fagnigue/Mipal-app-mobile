@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:mipal/helpers/colors.dart';
+import 'package:mipal/helpers/constants.dart';
 import 'package:mipal/helpers/popup.dart';
 import 'package:mipal/models/cagnotte.dart';
 import 'package:mipal/pages/cagnottes/create_cagnotte.dart';
+import 'package:mipal/pages/cagnottes/details_cagnotte.dart';
 import 'package:mipal/services/cagnotte_service.dart';
 
 class Cagnottes extends StatefulWidget {
@@ -57,7 +59,7 @@ class _CagnottesState extends State<Cagnottes> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Cagnottes'),
+        title: AppConstants.cagnottesPageTitle,
         backgroundColor: AppColors.background
       ),
       backgroundColor: AppColors.background,
@@ -83,7 +85,10 @@ class _CagnottesState extends State<Cagnottes> {
                       "Solde: ${cagnotte.solde} €\n"
                     ),
                     onTap: () {
-                      // Action lors du clic sur une cagnotte
+                      Navigator.push(context, 
+                        MaterialPageRoute(
+                          builder: (context) => DetailsCagnottePage(cagnotteId: cagnotte.id),
+                      ));
                     },
                   ),
                 );

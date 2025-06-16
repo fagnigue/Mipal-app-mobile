@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mipal/helpers/colors.dart';
+import 'package:mipal/helpers/constants.dart';
 import 'package:mipal/helpers/popup.dart';
 import 'package:mipal/main.dart';
 import 'package:mipal/models/transaction.dart';
@@ -91,7 +92,7 @@ class _DetailsTransactionState extends State<DetailsTransaction> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: AppColors.background,
-        title: const Text('Détails de la transaction'),
+        title: AppConstants.detailsTransactionPageTitle,
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())

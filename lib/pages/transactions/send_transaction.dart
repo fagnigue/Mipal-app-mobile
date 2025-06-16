@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mipal/helpers/colors.dart';
+import 'package:mipal/helpers/constants.dart';
 import 'package:mipal/helpers/format_exception.dart';
 import 'package:mipal/helpers/popup.dart';
 import 'package:mipal/helpers/widgets.dart';
@@ -142,7 +143,7 @@ class _SendTransactionPageState extends State<SendTransactionPage> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: AppColors.background,
-        title: Text('Envoyer de l\'argent'),
+        title: AppConstants.sendTransactionPageTitle,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

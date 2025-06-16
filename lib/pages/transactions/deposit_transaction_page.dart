@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:mipal/helpers/colors.dart';
+import 'package:mipal/helpers/constants.dart';
 import 'package:mipal/helpers/popup.dart';
 import 'package:mipal/helpers/widgets.dart';
 import 'package:mipal/main.dart';
 import 'package:mipal/services/transaction_service.dart';
 
-class AddTransactionPage extends StatefulWidget {
+class DepositTransactionPage extends StatefulWidget {
   final double? initialBalance;
-  const AddTransactionPage({super.key, required this.initialBalance});
+  const DepositTransactionPage({super.key, required this.initialBalance});
 
   @override
-  State<AddTransactionPage> createState() => _AddTransactionPageState();
+  State<DepositTransactionPage> createState() => _DepositTransactionPageState();
 }
 
-class _AddTransactionPageState extends State<AddTransactionPage> {
+class _DepositTransactionPageState extends State<DepositTransactionPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
@@ -77,7 +78,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: AppColors.background,
-        title: const Text('Effectuer un dépôt'),
+        title: AppConstants.depositTransactionPageTitle,
       ),
       body: SingleChildScrollView(
         child: Padding(

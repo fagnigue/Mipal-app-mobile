@@ -27,8 +27,12 @@ class StorageService {
     return null;
   }
 
-  clearUser() async {
+  clearUser() {
     localStorage.removeItem("user");
+  }
+
+  clearAll() {
+    localStorage.clear();
   }
 
   List<UserProfile> getBeneficiaires() {

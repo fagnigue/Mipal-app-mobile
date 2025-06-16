@@ -12,7 +12,7 @@ import 'package:mipal/pages/transactions/send_transaction.dart';
 import 'package:mipal/services/transaction_service.dart';
 import 'package:mipal/services/user_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'transactions/add_transaction_page.dart';
+import 'transactions/deposit_transaction_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -220,7 +220,7 @@ class _HomePageState extends State<HomePage> {
                         await Navigator.of(context).push(
                           MaterialPageRoute(
                             builder:
-                                (context) => AddTransactionPage(
+                                (context) => DepositTransactionPage(
                                   initialBalance: userProfile!.solde,
                                 ),
                           ),
