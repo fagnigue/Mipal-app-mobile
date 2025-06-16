@@ -102,6 +102,27 @@ class TransactionService {
     }
   }
 
+  Future<List<Transaction>> listTransactionsByCagnotte(String cagnotteId) async {
+    try {
+      final response = await supabase
+          .from('transactions')
+          .select()
+          .eq('cagnotte_id', cagnotteId)
+          .order('created_at', ascending: false);
+
+      return Future.wait((response as List).map((e) async {
+        final UserProfile? fromProfile = e['from'] != null ? await UserService().getUserProfileById(e['from']) : null;
+        final UserProfile? toProfile = e['from'] != null ? await UserService().getUserProfileById(e['to']) : null;
+        final transaction = Transaction.fromMap(e);
+        transaction.fromProfile = fromProfile;
+        transaction.toProfile = toProfile;
+        return transaction;
+      }).toList());
+    } catch (e) {
+      throw Exception('Erreur lors de la récupération des transactions de la cagnotte: $e');
+    }
+  }
+
 
   Future<void> createDeposit(String userId, double montant, String? description) async {
     try {

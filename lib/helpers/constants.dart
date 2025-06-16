@@ -73,4 +73,58 @@ class AppConstants {
       color: AppColors.textPrimary,
     ),
   );
+  static const Text cagnottePageTitle = Text(
+    "CAGNOTTE",
+    style: TextStyle(
+      fontWeight: FontWeight.w500,
+      letterSpacing: 2.0,
+      textBaseline: TextBaseline.alphabetic,
+      fontSize: 16,
+    ),
+  );
+  static const Text sendTransactionPageTitle = Text(
+    "ENVOYER DE L'ARGENT",
+    style: TextStyle(
+      fontWeight: FontWeight.w500,
+      letterSpacing: 2.0,
+      textBaseline: TextBaseline.alphabetic,
+      fontSize: 16,
+    ),
+  );
+  static const Text createCagnottePageTitle = Text(
+    "CRÉER UNE CAGNOTTE",
+    style: TextStyle(
+      fontWeight: FontWeight.w500,
+      letterSpacing: 2.0,
+      textBaseline: TextBaseline.alphabetic,
+      fontSize: 16,
+    ),
+  );
+  static const Text cagnottesPageTitle = Text(
+    "CAGNOTTES",
+    style: TextStyle(
+      fontWeight: FontWeight.w500,
+      letterSpacing: 2.0,
+      textBaseline: TextBaseline.alphabetic,
+      fontSize: 16,
+    ),
+  );
+  static const Text depositTransactionPageTitle = Text(
+    "EFFECTUER UN DÉPÔT",
+    style: TextStyle(
+      fontWeight: FontWeight.w500,
+      letterSpacing: 2.0,
+      textBaseline: TextBaseline.alphabetic,
+      fontSize: 16,
+    ),
+  );
+  static const Text detailsTransactionPageTitle = Text(
+    "DÉTAILS DE LA TRANSACTION",
+    style: TextStyle(
+      fontWeight: FontWeight.w500,
+      letterSpacing: 2.0,
+      textBaseline: TextBaseline.alphabetic,
+      fontSize: 14,
+    ),
+  );
 }

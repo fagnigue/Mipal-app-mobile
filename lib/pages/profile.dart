@@ -15,7 +15,7 @@ class ProfilePage extends StatelessWidget {
   ProfilePage({super.key, required this.userProfile});
 
   _googleSignOut(BuildContext context) async {
-    await StorageService().clearUser();
+    await StorageService().clearAll();
 
     await supabase.auth.signOut().then((value) async {
       if (appGoogleSignIn.currentUser != null) {
