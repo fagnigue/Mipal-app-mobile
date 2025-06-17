@@ -39,7 +39,7 @@ class _CreateCagnotteState extends State<CreateCagnotte> {
       setState(() {
         if (_montantController.text.isNotEmpty) {
           double montantValue = double.tryParse(_montantController.text) ?? 0.0;
-          restant = widget.initialAmount! - montantValue;
+            restant = double.parse((widget.initialAmount! - montantValue).toStringAsFixed(2));
           montantValid = montantValue > 0 && restant >= 0;
           canSend = titleValid && montantValid;
         }

@@ -139,24 +139,27 @@ class _HomePageState extends State<HomePage> {
         title: AppConstants.appName,
         automaticallyImplyLeading: false,
         actions: [
-          SizedBox(
-            width: 40,
-            height: 40,
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: Colors.grey[300],
-              ),
-              child: IconButton(
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder:
-                          (context) => ProfilePage(userProfile: userProfile!),
-                    ),
-                  );
-                },
-                icon: Icon(Icons.person, size: 20),
+          Padding(
+            padding: const EdgeInsets.only(right: 12.0),
+            child: SizedBox(
+              width: 40,
+              height: 40,
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: const Color.fromARGB(47, 158, 156, 247),
+                ),
+                child: IconButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder:
+                            (context) => ProfilePage(userProfile: userProfile!),
+                      ),
+                    );
+                  },
+                  icon: Icon(Icons.person, size: 20),
+                ),
               ),
             ),
           ),
