@@ -31,6 +31,7 @@ class CagnotteService {
       if (montantDeBase > 0) {
         await TransactionService().createTransactionForCagnotte(
           currentUser!.id,
+          currentUser!.id,
           montantDeBase,
           cagnotte.id,
         );
@@ -109,6 +110,7 @@ class CagnotteService {
           .from('cagnottes')
           .select()
           .eq('profile_id', currentUser!.id)
+          .eq('statut', 'en cours')
           .order('created_at', ascending: false);
       
       return Future.wait((response as List).map((e) async {
@@ -122,7 +124,7 @@ class CagnotteService {
     }
   }
 
-  ajouterCagnotte(String codeCagnotte) async {
+  Future<void> ajouterCagnotte(String codeCagnotte) async {
     try {
       final Cagnotte cagnotte = await getCagnotteByCode(codeCagnotte);
       final List<Cagnotte > cagnottes = StorageService().getCagnottes();
@@ -134,6 +136,16 @@ class CagnotteService {
       StorageService().ajouterCagnotte(cagnotte);
     } catch (e) {
       throw Exception(AppFormatException.message(e.toString()));
+    }
+  }
+
+  Future<void> cloturerCagnotte(String id)async {
+    try {
+      final Cagnotte? cagnotte = await getCagnotteById(id);
+      await supabase.from('cagnottes').update({'statut': 'cloturée'}).eq('id', id);
+      await TransactionService().createTransactionForCagnotte(null, currentUser!.id, cagnotte!.solde, cagnotte.id);
+    } catch (e) {
+      throw Exception('Erreur lors de la clôture de la cagnotte');
     }
   }
 

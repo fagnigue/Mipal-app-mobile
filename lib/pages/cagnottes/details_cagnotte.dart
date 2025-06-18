@@ -8,6 +8,7 @@ import 'package:mipal/models/cagnotte.dart';
 import 'package:mipal/models/transaction.dart';
 import 'package:mipal/services/cagnotte_service.dart';
 import 'package:mipal/services/transaction_service.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 class DetailsCagnottePage extends StatefulWidget {
   final String cagnotteId;
@@ -30,7 +31,80 @@ class DetailsCagnottePageState extends State<DetailsCagnottePage> {
     _loadTransactions();
   }
 
-  void _loadCagnotteDetails() async {
+  _showClotureDialog() async {
+    final result = await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Clôturer la cagnotte"),
+          content: const Text(
+            "Voulez-vous vraiment clôturer cette cagnotte ?\nLe solde restant sera transféré sur votre compte.",
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text("Annuler"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, true);
+              },
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              child: const Text("Clôturer"),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (result == true) {
+      await _cloturerCagnotte();
+    }
+  }
+
+  _showDescriptionModal() {
+    showMaterialModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      backgroundColor: AppColors.background,
+      builder: (context) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
+              decoration: const BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(color: Color.fromARGB(255, 201, 201, 201), width: 0.5),
+                ),
+              ),
+              child: const Text(
+                "Description",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                cagnotte?.description ?? 'Aucune description disponible',
+                style: const TextStyle(fontSize: 16),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  _loadCagnotteDetails() async {
     final Cagnotte? cagnotte = await CagnotteService().getCagnotteById(
       widget.cagnotteId,
     );
@@ -44,7 +118,7 @@ class DetailsCagnottePageState extends State<DetailsCagnottePage> {
     }
   }
 
-  void _loadTransactions() async {
+  _loadTransactions() async {
     try {
       final transactions = await TransactionService()
           .listTransactionsByCagnotte(widget.cagnotteId);
@@ -56,15 +130,33 @@ class DetailsCagnottePageState extends State<DetailsCagnottePage> {
     }
   }
 
+  _cloturerCagnotte() async {
+    try {
+      await CagnotteService().cloturerCagnotte(cagnotte!.id);
+      Popup.showSuccess(context, "Cagnotte clôturée avec succès");
+      _loadCagnotteDetails();
+      _loadTransactions();
+    } catch (e) {
+      Popup.showError(context, "Erreur lors de la clôture de la cagnotte");
+    }
+  }
+
   String formatTitle(Transaction transaction) {
+    if (transaction.from == null) {
+      return "transfert sur compte";
+    }
     return transaction.from == currentUser!.id
         ? "de Moi"
-        : "de ${transaction.fromProfile?.prenom ?? ''} ${transaction.fromProfile?.nom ?? ''}";
+        : "de ${transaction.fromProfile?.prenom} ${transaction.fromProfile?.nom}";
   }
 
   String formatDate(DateTime date) {
     String month = date.month.toString().padLeft(2, '0');
     return "${date.day}/$month/${date.year}";
+  }
+
+  bool estCagnotteCloturee() {
+    return cagnotte?.statut == "cloturée";
   }
 
   @override
@@ -83,13 +175,27 @@ class DetailsCagnottePageState extends State<DetailsCagnottePage> {
               child: Column(
                 children: [
                   Text(
-                    cagnotte?.titre ?? "Cagnotte",
+                    cagnotte?.titre ?? "chargement...",
                     style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                  const SizedBox(height: 10),
+                  TextButton(
+                    onPressed: _showDescriptionModal,
+                    child: Flex(
+                      direction: Axis.horizontal,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.description, color: AppColors.primary),
+                        const SizedBox(width: 5),
+                        Text(
+                          "Description",
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                      ],
+                    ),
+                  ),
                   AppConstants.solde,
                   const SizedBox(height: 10),
                   Text(
@@ -129,7 +235,52 @@ class DetailsCagnottePageState extends State<DetailsCagnottePage> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 10),
+                  estCagnotteCloturee()
+                      ? Container(
+                        width: "cloturée".length * 10.0,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[200],
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: const EdgeInsets.all(5.0),
+                        child: const Center(
+                          child: Text(
+                            "cloturée",
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ),
+                      )
+                      : ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color.fromARGB(
+                            255,
+                            187,
+                            61,
+                            52,
+                          ),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 12,
+                          ),
+                        ),
+                        onPressed: () {
+                          _showClotureDialog();
+                        },
+                        child: const Text(
+                          "Cloturer",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
                 ],
               ),
             ),
@@ -139,9 +290,7 @@ class DetailsCagnottePageState extends State<DetailsCagnottePage> {
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                AppConstants.transactions
-              ],
+              children: [AppConstants.transactions],
             ),
           ),
           Expanded(

@@ -1,8 +1,8 @@
 # MIPAL
-<p align="center">
+<p>
     <img src="https://fkpsfgtycmsvgouzattt.supabase.co/storage/v1/object/public/assets/images/mipal-splashscreen.jpg" alt="Splashscreen MIPAL" width="200"/>
     <img src="https://fkpsfgtycmsvgouzattt.supabase.co/storage/v1/object/public/assets/images/mipal-signin-page.jpg" alt="Page de connexion MIPAL" width="200"/>
-    <img src="https://fkpsfgtycmsvgouzattt.supabase.co/storage/v1/object/public/assets/images/mipal-home-page-2.jpg" alt="Page d'accueil MIPAL" width="200"/>
+    <img src="https://fkpsfgtycmsvgouzattt.supabase.co/storage/v1/object/public/assets/images/mipal-home-page.jpg" alt="Page d'accueil MIPAL" width="200"/>
 </p>
 
 
@@ -43,22 +43,23 @@ MIPAL est une application Flutter de gestion d'argent entre particuliers, permet
 
 ## Structure du projet
 
-```
+```bash
 lib/
-  main.dart                # Point d'entrée de l'application, initialisation Supabase et navigation principale
-  helpers/                 # Fichiers utilitaires (couleurs, constantes, widgets, popups, etc.)
-  models/                  # Modèles de données (UserProfile, Transaction, Cagnotte, etc.)
-  services/                # Services métier (auth, utilisateur, transaction, cagnotte, stockage local)
-  pages/
-    auth/                  # Pages d'authentification (login, signup, register)
-    cagnottes/             # Pages liées aux cagnottes (liste, création, détails)
-    transactions/          # Pages liées aux transactions (envoi, dépôt, détails)
-    home.dart              # Page d'accueil (solde, actions principales, liste des transactions)
-    profile.dart           # Page de profil utilisateur
-    beneficiaires.dart     # Page de gestion des bénéficiaires
+├── main.dart                # Point d'entrée de l'application, initialisation Supabase et navigation principale
+├── helpers/                 # Fichiers utilitaires (couleurs, constantes, widgets, popups, etc.)
+├── models/                  # Modèles de données (UserProfile, Transaction, Cagnotte, etc.)
+├── services/                # Services métier (auth, utilisateur, transaction, cagnotte, stockage local)
+└── pages/
+  ├── auth/                # Pages d'authentification (login, signup, register)
+  ├── cagnottes/           # Pages liées aux cagnottes (liste, création, détails)
+  ├── transactions/        # Pages liées aux transactions (envoi, dépôt, détails)
+  ├── home.dart            # Page d'accueil (solde, actions principales, liste des transactions)
+  ├── profile.dart         # Page de profil utilisateur
+  └── beneficiaires.dart   # Page de gestion des bénéficiaires
+
 assets/
-  images/                  # Images utilisées dans l'application
-  icons/                   # Icônes personnalisées
+├── images/                  # Images utilisées dans l'application
+└── icons/                   # Icônes personnalisées
 ```
 
 ## Technologies utilisées

@@ -16,8 +16,7 @@ class Cagnottes extends StatefulWidget {
 }
 
 class _CagnottesState extends State<Cagnottes> {
-  List<Cagnotte>? _cagnottes;
-  
+  final List<Cagnotte> _cagnottes = [];
 
   @override
   void initState() {
@@ -25,22 +24,33 @@ class _CagnottesState extends State<Cagnottes> {
     _loadCagnottes();
   }
 
-  void goToCreateCagnotte() async {
+  _goToCreateCagnotte() async {
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => CreateCagnotte(initialAmount: widget.initialAmount),
+        builder:
+            (context) => CreateCagnotte(initialAmount: widget.initialAmount),
       ),
     );
     _loadCagnottes();
   }
 
+  _goToDetailsCagnotte(String cagnotteId) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DetailsCagnottePage(cagnotteId: cagnotteId),
+      ),
+    );
+    _loadCagnottes();
+  }
 
   void _loadCagnottes() async {
     try {
       final cagnottes = await CagnotteService().getCagnottes();
       setState(() {
-        _cagnottes = cagnottes;
+        _cagnottes.clear();
+        _cagnottes.addAll(cagnottes);
       });
     } catch (e) {
       if (mounted) {
@@ -53,52 +63,59 @@ class _CagnottesState extends State<Cagnottes> {
     return "${date.day}/${date.month}/${date.year}";
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: AppConstants.cagnottesPageTitle,
-        backgroundColor: AppColors.background
+        backgroundColor: AppColors.background,
       ),
       backgroundColor: AppColors.background,
-      body: _cagnottes == null
-          ? const Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              padding: const EdgeInsets.all(8.0),
-              itemCount: _cagnottes!.length,
-              itemBuilder: (context, index) {
-                final cagnotte = _cagnottes![index];
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 4.0),
-                  child: ListTile(
-                    tileColor: const Color.fromARGB(255, 232, 234, 237),
-                    contentPadding: const EdgeInsets.all(2.0),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+      body:
+          _cagnottes.isEmpty
+              ? Center(
+                child: Text(
+                  "Pas de cagnottes en cours",
+                  style: TextStyle(color: Colors.grey[600], fontSize: 18),
+                ),
+              )
+              : ListView.builder(
+                padding: const EdgeInsets.all(8.0),
+                itemCount: _cagnottes.length,
+                itemBuilder: (context, index) {
+                  final cagnotte = _cagnottes[index];
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 6.0,
+                      horizontal: 4.0,
                     ),
-                    leading: const Icon(Icons.account_balance_wallet_rounded, size: 40,),
-                    title: Text(cagnotte.titre),
-                    subtitle: Text(
-                      "Créée le ${_formatDate(cagnotte.createdAt)}\n"
-                      "Solde: ${cagnotte.solde} €\n"
+                    child: ListTile(
+                      tileColor: const Color.fromARGB(255, 232, 234, 237),
+                      contentPadding: const EdgeInsets.all(2.0),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      leading: const Icon(
+                        Icons.account_balance_wallet_rounded,
+                        size: 40,
+                      ),
+                      title: Text(cagnotte.titre),
+                      subtitle: Text(
+                        "Créée le ${_formatDate(cagnotte.createdAt)}\n"
+                        "Solde: ${cagnotte.solde} €\n",
+                      ),
+                      onTap: () {
+                        _goToDetailsCagnotte(_cagnottes[index].id);
+                      },
                     ),
-                    onTap: () {
-                      Navigator.push(context, 
-                        MaterialPageRoute(
-                          builder: (context) => DetailsCagnottePage(cagnotteId: cagnotte.id),
-                      ));
-                    },
-                  ),
-                );
-              },
-            ),
+                  );
+                },
+              ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColors.primary,
         tooltip: 'Créer une Cagnotte',
         onPressed: () {
-          goToCreateCagnotte();
+          _goToCreateCagnotte();
         },
         child: const Icon(Icons.add, size: 30, color: Colors.white),
       ),
