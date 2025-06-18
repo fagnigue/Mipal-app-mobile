@@ -88,7 +88,7 @@ class TransactionService {
       
       return Future.wait((response as List).map((e) async {
         final UserProfile? fromProfile = e['from'] != null ? await UserService().getUserProfileById(e['from']) : null;
-        final UserProfile? toProfile = await UserService().getUserProfileById(e['to']);
+        final UserProfile? toProfile = e['to'] != null ? await UserService().getUserProfileById(e['to']) : null;
         final transaction = Transaction.fromMap(e);
         transaction.fromProfile = fromProfile;
         transaction.toProfile = toProfile;
@@ -132,9 +132,9 @@ class TransactionService {
         montant: montant,
         type: 'depot',
       );
-
+ 
       await supabase.from('transactions').insert(transaction.toMap());
-      await UserService().updateUserAmount(transaction.to!, montant);
+      await UserService().updateUserAmount(transaction.from!, montant);
     } catch (e) {
       throw Exception('Erreur lors du dépôt: $e');
     }

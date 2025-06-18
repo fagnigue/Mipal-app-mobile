@@ -74,6 +74,7 @@ class UserService {
 
   Future<void> updateUserAmount(String userId, double amount) async {
     try {
+      print("Updating user amount for userId: $userId with amount: $amount");
       final profile = await getUserProfileById(userId);
       await supabase
           .from('profiles')
