@@ -31,27 +31,28 @@ class TransactionService {
     }
   }
 
-  Future<String> createTransactionForCagnotte(String recipient, double montant, String cagnotteId) async {
+  Future<String> createTransactionForCagnotte(String? from, String to, double montant, String cagnotteId) async {
     try {
-      final currentUser = supabase.auth.currentUser;
-      final String? from = currentUser?.id;
-
       final transaction = Transaction.create(
-        from: from!,
-        to: recipient,
+        from: from,
+        to: to,
         montant: montant,
         type: "cagnotte",
         cagnotteId: cagnotteId,
       );
       await supabase.from('transactions').insert(transaction.toMap());
-      await UserService().updateUserAmount(from, -montant);
-      await CagnotteService().updateSoldeCagnotte(cagnotteId, montant);
+      if (from != null) {
+        await UserService().updateUserAmount(from, -montant);
+        await CagnotteService().updateSoldeCagnotte(cagnotteId, montant);
+      } else if (from == null) {
+        await UserService().updateUserAmount(to, montant);
+        await CagnotteService().updateSoldeCagnotte(cagnotteId, -montant);
+      }
       return transaction.id;
     } catch (e) {
       throw Exception(AppFormatException.message(e.toString()));
     }
   }
-
   
   Future<Transaction?> getTransactionById(String transactionId) async {
     try {
@@ -87,7 +88,7 @@ class TransactionService {
       
       return Future.wait((response as List).map((e) async {
         final UserProfile? fromProfile = e['from'] != null ? await UserService().getUserProfileById(e['from']) : null;
-        final UserProfile? toProfile = e['from'] != null ? await UserService().getUserProfileById(e['to']) : null;
+        final UserProfile? toProfile = await UserService().getUserProfileById(e['to']);
         final transaction = Transaction.fromMap(e);
         transaction.fromProfile = fromProfile;
         transaction.toProfile = toProfile;
@@ -112,7 +113,7 @@ class TransactionService {
 
       return Future.wait((response as List).map((e) async {
         final UserProfile? fromProfile = e['from'] != null ? await UserService().getUserProfileById(e['from']) : null;
-        final UserProfile? toProfile = e['from'] != null ? await UserService().getUserProfileById(e['to']) : null;
+        final UserProfile? toProfile = await UserService().getUserProfileById(e['to']);
         final transaction = Transaction.fromMap(e);
         transaction.fromProfile = fromProfile;
         transaction.toProfile = toProfile;

@@ -51,18 +51,17 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  Text formatTitle(Transaction transaction) {
+  String formatTitle(Transaction transaction) {
     if (transaction.type == "cagnotte") {
-      return Text(transaction.cagnotte?.titre ?? '');
+      return transaction.from != null ? "${transaction.cagnotte?.titre}" : "de ${transaction.cagnotte?.titre}";
     }
     if (transaction.type == "depot") {
-      return const Text("Dépôt");
+      return "Dépôt";
     }
-    return Text(
+    return 
       transaction.from == currentUser!.id
           ? "à ${transaction.toProfile?.prenom ?? ''} ${transaction.toProfile?.nom ?? ''}"
-          : "de ${transaction.fromProfile?.prenom ?? ''} ${transaction.fromProfile?.nom ?? ''}",
-    );
+          : "de ${transaction.fromProfile?.prenom ?? ''} ${transaction.fromProfile?.nom ?? ''}";
   }
 
   Text formatMontant(Transaction transaction) {
@@ -282,7 +281,7 @@ class _HomePageState extends State<HomePage> {
                       leading: Icon(
                         predictTransactionIcon(transactions[index]),
                       ),
-                      title: formatTitle(transactions[index]),
+                      title: Text(formatTitle(transactions[index])),
                       subtitle: Text(
                         "${formatTransactionType(transactions[index])} - ${formatDate(transactions[index].createdAt)}",
                       ),

@@ -4,6 +4,7 @@ import 'package:mipal/helpers/constants.dart';
 import 'package:mipal/helpers/format_exception.dart';
 import 'package:mipal/helpers/popup.dart';
 import 'package:mipal/helpers/widgets.dart';
+import 'package:mipal/main.dart';
 import 'package:mipal/models/cagnotte.dart';
 import 'package:mipal/models/user_profile.dart';
 import 'package:mipal/pages/beneficiaires.dart';
@@ -61,6 +62,7 @@ class _SendTransactionPageState extends State<SendTransactionPage> {
     if (_formKey.currentState!.validate()) {
       final amount = _amountController.text.trim();
       final recipient = _recipientController.text.trim();
+      final currentUser = supabase.auth.currentUser;
 
       final double amountValue = double.tryParse(amount) ?? 0.0;
       try {
@@ -73,6 +75,7 @@ class _SendTransactionPageState extends State<SendTransactionPage> {
         }
         if (cagnotte != null) {
           transactionId = await transactionService.createTransactionForCagnotte(
+            currentUser?.id,
             recipient,
             amountValue,
             cagnotte!.id,
