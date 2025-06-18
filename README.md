@@ -82,7 +82,6 @@ assets/
 - Exporter son budget ou ses entrées-sorties d’argent en PDF ou Excel
 - Ajouter une fonctionnalité «Payer pour» : Payer à la place d’une personne avec son autorisation. Ce qui va créer une dette chez cette personne et pourra être réglée plutard
 
-
 ## Lancement du projet
 1. Cloner le dépôt
 2. Installer les dépendances :
