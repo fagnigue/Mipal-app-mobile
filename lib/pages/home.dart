@@ -65,15 +65,19 @@ class _HomePageState extends State<HomePage> {
   }
 
   Text formatMontant(Transaction transaction) {
-    final isFromCurrentUser = transaction.from == currentUser!.id;
-    final montantText =
-        "${isFromCurrentUser ? '-' : ''}${transaction.montant} €";
+    bool isPositive = transaction.from == currentUser!.id ? false : true;
+    if (transaction.type == "depot") {
+      isPositive = true;
+    }
+    
+    String montantText = "${!isPositive ? '-' : ''}${transaction.montant} €";
+
     return Text(
       montantText,
       style: TextStyle(
         fontSize: 15,
         fontWeight: FontWeight.bold,
-        color: isFromCurrentUser ? Colors.black : Colors.green,
+        color: !isPositive ? Colors.black : Colors.green,
       ),
     );
   }

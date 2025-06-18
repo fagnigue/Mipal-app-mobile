@@ -3,6 +3,8 @@
     <img src="https://fkpsfgtycmsvgouzattt.supabase.co/storage/v1/object/public/assets/images/mipal-splashscreen.jpg" alt="Splashscreen MIPAL" width="200"/>
     <img src="https://fkpsfgtycmsvgouzattt.supabase.co/storage/v1/object/public/assets/images/mipal-signin-page.jpg" alt="Page de connexion MIPAL" width="200"/>
     <img src="https://fkpsfgtycmsvgouzattt.supabase.co/storage/v1/object/public/assets/images/mipal-home-page.jpg" alt="Page d'accueil MIPAL" width="200"/>
+    <img src="https://fkpsfgtycmsvgouzattt.supabase.co/storage/v1/object/public/assets/images/mipal-beneficiaire.jpg" alt="Page d'accueil MIPAL" width="200"/>
+    <img src="https://fkpsfgtycmsvgouzattt.supabase.co/storage/v1/object/public/assets/images/mipal-details-cagnotte.jpg" alt="Page d'accueil MIPAL" width="200"/>
 </p>
 
 
@@ -18,7 +20,7 @@ MIPAL est une application Flutter de gestion d'argent entre particuliers, permet
   - Gestion de session et déconnexion
 
 - **Gestion du profil** :
-  - Affichage et modification des informations personnelles
+  - Affichage des informations personnelles
   - Visualisation du solde actuel
 
 - **Transactions** :
@@ -67,6 +69,18 @@ assets/
 - **Supabase** (authentification, base de données)
 - **localstorage** (stockage local)
 - **Google Sign-In** 
+
+## Les fonctionnalités non implémentées
+- Gestion des services ou produits (Une personne peut définir un service ou un produit à vendre et partager le code pour qu'une autre personne puisse payer)
+- Modification du profil Utilisateur
+
+## Perspectives
+- Mettre un système de notifications
+- Ajouter des codes QR et un scan pour faciliter l’envoi d’argent et les paiements
+- Gérer un budget (Enregistrer manuellement les entrées et sorties d’argent)
+- Mettre un dashboard (avec graphique) de suivi des transactions selon les périodes
+- Exporter son budget ou ses entrées-sorties d’argent en PDF ou Excel
+- Ajouter une fonctionnalité «Payer pour» : Payer à la place d’une personne avec son autorisation. Ce qui va créer une dette chez cette personne et pourra être réglée plutard
 
 ## Lancement du projet
 1. Cloner le dépôt

@@ -304,9 +304,9 @@ class DetailsCagnottePageState extends State<DetailsCagnottePage> {
                     style: const TextStyle(fontSize: 16),
                   ),
                   subtitle: Text(formatDate(transaction.createdAt)),
-                  leading: Icon(Icons.arrow_downward, color: Colors.green),
+                  leading: transaction.from != null ? Icon(Icons.arrow_downward, color: Colors.green) : Icon(Icons.arrow_upward),
                   trailing: Text(
-                    "${transaction.montant} €",
+                    "${transaction.from != null ? '': '-'} ${transaction.montant} €",
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
